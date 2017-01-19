@@ -17,18 +17,20 @@ class Frame(ttk.Frame, object):
         w.grid(sticky=sticky, **kwargs)
 
     @staticmethod
-    def configure_column(w, indexes, weight=1):
+    def configure_column(w, indexes, weight=1, **kwargs):
         if not isinstance(indexes, (tuple, list)):
             indexes = [indexes]
+        kwargs["weight"] = weight
         for index in indexes:
-            w.grid_columnconfigure(index, weight)
+            w.grid_columnconfigure(index, **kwargs)
 
     @staticmethod
-    def configure_row(w, indexes, weight=1):
+    def configure_row(w, indexes, weight=1, **kwargs):
         if not isinstance(indexes, (tuple, list)):
             indexes = [indexes]
+        kwargs["weight"] = weight
         for index in indexes:
-            w.grid_rowconfigure(index, weight)
+            w.grid_rowconfigure(index, **kwargs)
 
     def __init__(self, parent):
         """

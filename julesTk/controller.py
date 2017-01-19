@@ -16,7 +16,8 @@ class Controller(Observer):
         # handle to the model
         self._model = model
         # register as observer
-        self.model.register_observer(self)
+        if self.model is not None:
+            self.model.register_observer(self)
 
     def __del__(self):
         self.stop()
@@ -59,8 +60,9 @@ class Controller(Observer):
 
     @model.setter
     def model(self, model):
-        if not isinstance(model, Model):
+        if model is not None and not isinstance(model, Model):
             raise ValueError("Invalid model")
         self._model = model
         # register as observer
-        self.model.register_observer(self)
+        if self.model is not None:
+            self.model.register_observer(self)
