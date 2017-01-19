@@ -88,6 +88,7 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
+        "plot": ['matplotlib']
         #'dev': ['check-manifest'],
         #'test': ['coverage'],
     },

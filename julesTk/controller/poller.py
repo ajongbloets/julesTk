@@ -1,6 +1,6 @@
 """The polling mixin for controllers (poller) helps controllers to update the view based on changes in the model"""
 
-from controller import Controller
+from julesTk.controller import Controller
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 

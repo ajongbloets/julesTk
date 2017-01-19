@@ -1,6 +1,6 @@
 """Implementing basic view objects"""
 
-from . import *
+from julesTk import *
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 

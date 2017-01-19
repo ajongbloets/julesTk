@@ -1,7 +1,7 @@
 """Provide Controller classes"""
 
 from julesTk import Observer
-from model import Model
+from julesTk.model import Model
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
