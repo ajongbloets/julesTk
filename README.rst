@@ -31,7 +31,7 @@ The View
 The Model
 ---------
 
-Models store and handle data. These should be thread-safe, allowing for multithreaded applications to work with the GUI.
+Models store and handle data. These should be thread-safe, allowing for multi-threaded applications to work with the GUI.
 The model in those cases serves as the interface between threads.
 
 Observer and Observable
@@ -39,6 +39,7 @@ Observer and Observable
 
 The observer-observable paradigm is used to provide update routes between the model and the controller.
 
+*TODO*: Consider whether observer-observable is compatible with multi-threading support.
 
 Application flow
 ================
@@ -58,3 +59,6 @@ While in the main loop
 3. controller handles input - acts on model
 4. model updates - calls controller
 5. controller handles update - acts on view
+
+Plotting
+========
