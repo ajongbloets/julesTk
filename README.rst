@@ -1,3 +1,4 @@
+========
 Jules-tk
 ========
 
@@ -16,25 +17,26 @@ Jules-tk provides the MVC structure, similar to what web-frameworks as django do
 (app.py) which will load controllers. The controllers will then initialize the models it needs and the view it works with.
 
 The Controller
-==============
+--------------
 
 Controller serve as the logic hub of the application and bridge from view and model.
 
 The View
-========
+--------
 
-Frame: Non-interacting Frame widget.
-View: interacting, requires a controller.
-ViewSet: combine multiple views into one window
+* Frame: Non-interacting Frame widget.
+* View: interacting, requires a controller.
+* ViewSet: combine multiple views into one window
 
 The Model
-=========
+---------
 
 Models store and handle data. These should be thread-safe, allowing for multithreaded applications to work with the GUI.
 The model in those cases serves as the interface between threads.
 
 Observer and Observable
 =======================
+
 The observer-observable paradigm is used to provide update routes between the model and the controller.
 
 

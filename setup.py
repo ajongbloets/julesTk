@@ -29,7 +29,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/jongbloets/jules_tk',
+    url='https://github.com/jongbloets/julesTk',
 
     # Author details
     author='Joeri Jongbloets',
@@ -48,8 +48,6 @@ setup(
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering',
 
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: MIT License',
