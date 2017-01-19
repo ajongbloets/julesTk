@@ -33,6 +33,9 @@ class Poller(Controller):
     def start(self):
         raise NotImplementedError
 
+    def update(self, observable):
+        raise NotImplementedError
+
     def run(self):
         """Runs the poller"""
         self.set_polling(True)
@@ -42,9 +45,12 @@ class Poller(Controller):
         raise NotImplementedError
 
     def _update(self):
-        self.execute()
+        try:
+            self.execute()
+        except KeyboardInterrupt:
+            self.set_polling(False)
         if self.is_polling():
-            self.view.after(self._interval * 1000, self._update)
+            self.view.after(int(self._interval * 1000), self._update)
 
     def stop(self):
         self.set_polling(False)

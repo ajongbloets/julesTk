@@ -58,6 +58,10 @@ class PlotFrame(Frame):
 
     @property
     def axes(self):
+        """Returns the current subplot in the figure
+
+        :rtype: matplotlib.axes.Axes
+        """
         return self._axes
 
     @property
@@ -86,3 +90,29 @@ class PlotFrame(Frame):
         self.figure.clear()
         self._setup_subplot()
         self.canvas.draw()
+
+
+class PlotView(View):
+    """ A view with a plot embedded.
+
+    """
+
+    def __init__(self, parent, controller):
+        super(PlotView, self).__init__(parent, controller)
+        self._plot = None
+
+    @property
+    def plot(self):
+        """ Returns the plot frame embedded in this frame
+
+        :rtype: julesTk.view.plot.PlotFrame
+        """
+        return self._plot
+
+    def setup(self):
+        self.configure_grid(self)
+        self.setup_plot()
+
+    def setup_plot(self):
+        self._plot = PlotFrame(self)
+        self.plot.setup()
