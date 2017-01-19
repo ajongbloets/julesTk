@@ -121,6 +121,7 @@ class View(Frame):
         return True
 
     def setup(self):
+        """Configure this view"""
         raise NotImplementedError
 
 
@@ -164,23 +165,35 @@ class ViewSet(View):
         self.views.pop(name)
 
     def show_view(self, name):
+        """Show a specific View"""
         v = self.get_view(name)
         v.show()
 
+    def hide_views(self):
+        """Hide all Views"""
+        for v in self._views.keys():
+            self.hide_view(v)
+        # done
+
     def hide_view(self, name):
+        """Hide a specific View"""
         v = self.get_view(name)
         v.grid_remove()
 
     def show(self):
+        """Show this ViewSet"""
         raise NotImplementedError
 
     def hide(self):
+        """Hide this ViewSet"""
         raise NotImplementedError
 
     def setup(self):
+        """Configure this ViewSet"""
         raise NotImplementedError
 
     def close(self):
+        """Close this ViewSet"""
         while len(self.views.values()) > 0:
             v = self.views.keys()[0]
             self.get_view(v).close()

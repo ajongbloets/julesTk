@@ -1,11 +1,12 @@
 """Provide Controller classes"""
 
+from julesTk import Observer
 from model import Model
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
-class Controller(object):
+class Controller(Observer):
 
     def __init__(self, app, view=None, model=None):
         super(Controller, self).__init__()
@@ -14,6 +15,8 @@ class Controller(object):
         self._view = view
         # handle to the model
         self._model = model
+        # register as observer
+        self.model.register_observer(self)
 
     def __del__(self):
         self.stop()
@@ -26,6 +29,9 @@ class Controller(object):
         raise NotImplementedError
 
     def stop(self):
+        raise NotImplementedError
+
+    def update(self, observable):
         raise NotImplementedError
 
     @property
@@ -56,3 +62,5 @@ class Controller(object):
         if not isinstance(model, Model):
             raise ValueError("Invalid model")
         self._model = model
+        # register as observer
+        self.model.register_observer(self)

@@ -1,11 +1,11 @@
 """Model classes"""
 
-from . import ThreadSafeObject
+from . import Observable, ThreadSafeObject
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
-class Model(ThreadSafeObject):
+class Model(Observable, ThreadSafeObject):
 
     def __init__(self):
         super(Model, self).__init__()
