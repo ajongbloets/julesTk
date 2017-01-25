@@ -45,11 +45,11 @@ class Poller(Controller):
         raise NotImplementedError
 
     def _update(self):
-        try:
-            self.execute()
-        except KeyboardInterrupt:
-            self.set_polling(False)
         if self.is_polling():
+            try:
+                self.execute()
+            except KeyboardInterrupt:
+                self.set_polling(False)
             self.view.after(int(self._interval * 1000), self._update)
 
     def stop(self):
