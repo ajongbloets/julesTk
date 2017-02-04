@@ -1,3 +1,10 @@
+Version 0.2.1
+=============
+
+* Untangle controller classes from observer
+* Move observer-observable to utils
+* Add 'has_model' to controller
+
 Version 0.2.0.alpha
 ===================
 

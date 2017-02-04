@@ -1,5 +1,6 @@
 """The Random Plot Application plots random y-values using random generator"""
 from julesTk import app, view
+from julesTk.utils.observe import Observer
 from julesTk.controller.poller import Poller
 from julesTk.model.random import RandomModel
 from julesTk.view.plot import PlotFrame
@@ -20,7 +21,7 @@ class RandomPlotApp(app.Application):
         self.get_controller("main").start()
 
 
-class MainController(Poller):
+class MainController(Poller, Observer):
 
     def setup(self):
         if self.view is None:

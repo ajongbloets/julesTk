@@ -1,5 +1,6 @@
 
 from julesTk import app, controller, view, model
+from julesTk.utils.observe import Observer
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -15,31 +16,6 @@ class ClickMeApp(app.Application):
 
     def run(self):
         self.get_controller("main").start()
-
-
-class MainController(controller.Controller):
-
-    def setup(self):
-        if self.view is None:
-            self._view = MainView(self.application, self)
-        if self.model is None:
-            self.model = ClickModel()
-            self.model.register_observer(self)
-        self.view.setup()
-        return self
-
-    def start(self):
-        self.view.show()
-
-    def stop(self):
-        self.view.close()
-
-    def update(self, observable):
-        if isinstance(observable, ClickModel):
-            self.view.clicks = observable.data
-
-    def add_click(self):
-        self.model.update()
 
 
 class MainView(view.View):
@@ -79,14 +55,34 @@ class ClickModel(model.Model):
         super(ClickModel, self).__init__()
         self.reset()
 
-    @model.Model.thread_safe
     def reset(self):
-        self._data = 0
-
-    @model.Model.thread_safe
-    def update(self):
-        self._data += 1
+        with self.lock:
+            self._data = 0
         self.notify_observers()
+
+    def update(self):
+        with self.lock:
+            self._data += 1
+        self.notify_observers()
+
+
+class MainController(controller.Controller, Observer):
+
+    VIEW_CLASS = MainView
+
+    def setup(self):
+        super(MainController, self).setup()
+        if self.model is None:
+            self.model = ClickModel()
+            self.model.register_observer(self)
+        return self
+
+    def update(self, observable):
+        if isinstance(observable, ClickModel):
+            self.view.clicks = observable.data
+
+    def add_click(self):
+        self.model.update()
 
 
 if __name__ == "__main__":

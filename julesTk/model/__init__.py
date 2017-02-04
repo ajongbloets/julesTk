@@ -1,6 +1,7 @@
 """Model classes"""
 
-from julesTk import Observable, ThreadSafeObject
+from julesTk import ThreadSafeObject
+from julesTk.utils.observe import Observable
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
