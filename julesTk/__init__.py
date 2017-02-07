@@ -8,6 +8,7 @@ if sys.version_info[0] < 3:
 else:
     import tkinter as tk
 import ttk
+import functools
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -38,9 +39,13 @@ class ThreadSafeObject(object):
 
     def thread_safe(f):
         """A decorator for making methods thread-safe"""
+        @functools.wraps(f)
         def magic(self, *args, **kwargs):
-            with self.lock:
+            try:
+                self.lock.acquire()
                 result = f(self, *args, **kwargs)
+            finally:
+                self.lock.release()
             return result
         return magic
 

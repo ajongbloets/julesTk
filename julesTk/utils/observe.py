@@ -1,5 +1,6 @@
 """Provides classes that help with creating Observer-Observable structures"""
 
+import functools
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -45,6 +46,7 @@ class Observable(object):
 
         :type f: callable
         """
+        @functools.wraps(f)
         def magic(self, *args, **kwargs):
             result = f(self, *args, **kwargs)
             self.notify_observers()

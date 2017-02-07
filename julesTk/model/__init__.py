@@ -14,6 +14,7 @@ class Model(Observable, ThreadSafeObject):
 
     @property
     def data(self):
+        """RAW Representation of the data contained in the model"""
         with self.lock:
             result = self._data
         return result

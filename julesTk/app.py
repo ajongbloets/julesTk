@@ -73,24 +73,24 @@ class Application(ThreadSafeObject, tk.Tk):
         """Configures the application and loads at least one controller"""
         raise NotImplementedError
 
-    def start(self):
+    def run(self):
         """Start the application"""
         with self.lock:
             # prepare the application
             self.setup()
             # now start the application
-            self.run()
+            self.start()
         # in the main loop we wait, so we do not need a lock
         self.mainloop()
         with self.lock:
             # clean up
-            self.quit()
+            self.stop()
 
-    def run(self):
+    def start(self):
         """Everything to show and run the applciation"""
         raise NotImplementedError
 
-    def quit(self):
+    def stop(self):
         while len(self.controllers) > 0:
             name = self.controllers.keys()[0]
             self.get_controller(name).stop()

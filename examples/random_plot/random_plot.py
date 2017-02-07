@@ -17,7 +17,7 @@ class RandomPlotApp(app.Application):
         c = MainController(self).setup()
         self.add_controller("main", c)
 
-    def run(self):
+    def start(self):
         self.get_controller("main").start()
 
 
@@ -100,9 +100,11 @@ class MainView(view.View):
         self._plot = None
 
     def setup(self):
+        # resize with window size
         self.grid(sticky="nsew")
         self.configure_column(self, [0, 1, 2])
         self.configure_row(self, [0, 1, 2])
+        # parent should also resize
         self.configure_row(self.parent, 0)
         self.configure_column(self.parent, 0)
         # add start button
@@ -161,4 +163,4 @@ class MainView(view.View):
 if __name__ == "__main__":
 
     app = RandomPlotApp()
-    app.start()
+    app.run()

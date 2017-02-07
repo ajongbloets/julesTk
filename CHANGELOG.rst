@@ -1,3 +1,12 @@
+Version 0.2.2
+=============
+
+* Streamline app run/start/stop method names
+* Parent chaining of controllers and views
+* Use functools with decorators
+* Exception safe locking
+* Improve docstrings
+
 Version 0.2.1
 =============
 

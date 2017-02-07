@@ -14,18 +14,20 @@ class ClickMeApp(app.Application):
         c = MainController(self).setup()
         self.add_controller("main", c)
 
-    def run(self):
+    def start(self):
         self.get_controller("main").start()
 
 
 class MainView(view.View):
 
     def setup(self):
+        # resize uniform over rows/columns with window
         self.grid(sticky="nsew")
         self.configure_column(self, [0, 1], uniform="foo")
         self.configure_row(self, [0, 1], uniform="foo")
-        self.parent.grid_columnconfigure(0, weight=1)
-        self.parent.grid_rowconfigure(0, weight=1)
+        # parent should also resize
+        self.configure_row(self.parent, 0)
+        self.configure_column(self.parent, 0)
         lbl = view.ttk.Label(self, text="Hello World!", font=self.FONT_LARGE)
         self.add_widget("label1", lbl)
         lbl.grid(sticky="nsew", columnspan=2, padx=10, pady=10)
@@ -88,4 +90,4 @@ class MainController(controller.Controller, Observer):
 if __name__ == "__main__":
 
     app = ClickMeApp()
-    app.start()
+    app.run()
