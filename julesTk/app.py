@@ -1,4 +1,6 @@
-"""Module managing starting and stopping the application"""
+"""Module managing starting and stopping the application
+
+"""
 
 from . import tk, ThreadSafeObject
 
@@ -18,7 +20,7 @@ class Application(ThreadSafeObject, tk.Tk):
         """All controllers attached to this application
 
         :return: A dictionary of the name - controller mapping
-        :rtype: dict[str, pyLabJackView.controller.Controller]
+        :rtype: dict[str, pyLabJackView.controller.BaseController]
         """
         return self._controllers
 
@@ -29,7 +31,7 @@ class Application(ThreadSafeObject, tk.Tk):
 
         :param name: Name of the controller
         :type name: str
-        :rtype: julesTk.controller.Controller
+        :rtype: julesTk.controller.BaseController
         """
         if not self.has_controller(name):
             raise KeyError("No controller registered under: {}".format(name))
@@ -52,7 +54,7 @@ class Application(ThreadSafeObject, tk.Tk):
         :param name: Name to register the controller under
         :type name: str
         :param controller: The controller to register
-        :type controller: julesTk.controller.Controller
+        :type controller: julesTk.controller.BaseController
         """
         if self.has_controller(name):
             raise KeyError("Already registered a controller under: {}".format(name))
