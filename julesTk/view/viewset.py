@@ -1,4 +1,4 @@
-from julesTk.view import ttk, View
+from julesTk.view import View
 
 
 class ViewSet(View):
@@ -54,24 +54,16 @@ class ViewSet(View):
     def hide_view(self, name):
         """Hide a specific View"""
         v = self.get_view(name)
-        v.grid_remove()
+        v.hide()
 
-    def show(self):
-        """Show this ViewSet"""
-        raise NotImplementedError
-
-    def hide(self):
-        """Hide this ViewSet"""
-        raise NotImplementedError
-
-    def prepare(self):
+    def _prepare(self):
         """Configure this ViewSet"""
         raise NotImplementedError
 
-    def close(self):
+    def _close(self):
         """Close this ViewSet"""
         while len(self.views.values()) > 0:
             v = self.views.keys()[0]
             self.get_view(v).close()
             self.remove_view(v)
-        super(ViewSet, self).close()
+        super(ViewSet, self)._close()
