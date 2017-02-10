@@ -10,17 +10,20 @@ class ClickMeApp(app.Application):
     def __init__(self):
         super(ClickMeApp, self).__init__()
 
-    def setup(self):
-        c = MainController(self).setup()
-        self.add_controller("main", c)
+    def _prepare(self):
+        self.add_controller("main", MainController(self))
 
-    def start(self):
-        self.get_controller("main").start()
+    @property
+    def main(self):
+        return self.get_controller("main")
+
+    def _start(self):
+        self.main.start()
 
 
 class MainView(view.View):
 
-    def setup(self):
+    def _prepare(self):
         # resize uniform over rows/columns with window
         self.grid(sticky="nsew")
         self.configure_column(self, [0, 1], uniform="foo")
@@ -57,14 +60,14 @@ class ClickModel(model.Model):
         super(ClickModel, self).__init__()
         self.reset()
 
+    @model.Model.thread_safe
     def reset(self):
-        with self.lock:
-            self._data = 0
+        self._data = 0
         self.notify_observers()
 
+    @model.Model.thread_safe
     def update(self):
-        with self.lock:
-            self._data += 1
+        self._data += 1
         self.notify_observers()
 
 
@@ -72,8 +75,8 @@ class MainController(controller.Controller, Observer):
 
     VIEW_CLASS = MainView
 
-    def setup(self):
-        super(MainController, self).setup()
+    def _prepare(self):
+        super(MainController, self)._prepare()
         if self.model is None:
             self.model = ClickModel()
             self.model.register_observer(self)

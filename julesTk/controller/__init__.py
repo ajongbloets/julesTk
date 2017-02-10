@@ -12,18 +12,34 @@ class BaseController(object):
     def __init__(self, parent):
         super(BaseController, self).__init__()
         self._parent = parent
+        self._configured = False
 
     def __del__(self):
         self.stop()
 
-    def setup(self):
+    def prepare(self):
+        self._prepare()
+        self._configured = True
+        return self
+
+    def _prepare(self):
         """Configures the controller (set-up model, view)"""
         raise NotImplementedError
 
     def start(self):
+        """Start the controller"""
+        if not self._configured:
+            self.prepare()
+        return self._start()
+
+    def _start(self):
         raise NotImplementedError
 
     def stop(self):
+        """Stop the controller"""
+        return self._stop()
+
+    def _stop(self):
         raise NotImplementedError
 
     @property
@@ -59,19 +75,30 @@ class ViewController(BaseController):
         """
         return self._view
 
+    @property
+    def parent_view(self):
+        """Return the view of the parent of this controller
+
+        :rtype: julesTk.view.View
+        """
+        pview = self.parent
+        if isinstance(pview, BaseController):
+            pview = self.parent.view
+        return pview
+
     def has_view(self):
         """Whether the controller has a view attached"""
         return self.view is not None
 
-    def start(self):
+    def _start(self):
         """Start the controller and open the view"""
         self.view.show()
 
-    def stop(self):
+    def _stop(self):
         """Stop the controller and close the view managed by the view"""
         self.view.close()
 
-    def setup(self):
+    def _prepare(self):
         """Configure the controller and view.
 
         Should be called before showing the view or starting the controller.
@@ -80,14 +107,20 @@ class ViewController(BaseController):
         :rtype: julesTk.controller.ViewController
         """
         if not self.has_view():
-            if not issubclass(self.VIEW_CLASS, View):
-                raise ValueError("Expected a view not {}".format(self.VIEW_CLASS.__name__))
-            pview = self.parent
-            if isinstance(pview, BaseController):
-                pview = self.parent.view
-            self._view = self.VIEW_CLASS(pview, self)
-        self.view.setup()
+            self.load_view()
+        self.view.prepare()
         return self
+
+    def load_view(self):
+        """Returns a new instance of the view as defined in VIEW_CLASS
+
+        :return:
+        :rtype: julesTk.view.View
+        """
+        if not issubclass(self.VIEW_CLASS, View):
+            raise ValueError("Expected a view not {}".format(self.VIEW_CLASS.__name__))
+        self._view = self.VIEW_CLASS(self.parent_view, self)
+        return self.view
 
 
 class ModelController(BaseController):
@@ -119,15 +152,15 @@ class ModelController(BaseController):
         """Whether the controller has a model attached"""
         return self.model is not None
 
-    def start(self):
+    def _start(self):
         """Start the controller"""
         raise NotImplementedError
 
-    def stop(self):
+    def _stop(self):
         """Stop the controller"""
         raise NotImplementedError
 
-    def setup(self):
+    def _prepare(self):
         """Set-up and configure the controller"""
         raise NotImplementedError
 

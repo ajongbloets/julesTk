@@ -27,10 +27,10 @@ class Poller(Controller):
     def set_polling(self, state):
         self._polling = state is True
 
-    def setup(self):
+    def _prepare(self):
         raise NotImplementedError
 
-    def start(self):
+    def _start(self):
         raise NotImplementedError
 
     def update(self, observable):
@@ -52,6 +52,6 @@ class Poller(Controller):
                 self.set_polling(False)
             self.view.after(int(self._interval * 1000), self._update)
 
-    def stop(self):
+    def _stop(self):
         self.set_polling(False)
-        super(Poller, self).stop()
+        super(Poller, self)._stop()

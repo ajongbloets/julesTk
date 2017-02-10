@@ -13,23 +13,26 @@ class RandomPlotApp(app.Application):
     def __init__(self):
         super(RandomPlotApp, self).__init__()
 
-    def setup(self):
-        c = MainController(self).setup()
-        self.add_controller("main", c)
+    def _prepare(self):
+        self.add_controller("main", MainController(self))
 
-    def start(self):
-        self.get_controller("main").start()
+    @property
+    def main(self):
+        return self.get_controller("main")
+
+    def _start(self):
+        self.main.start()
 
 
 class MainController(Poller, Observer):
 
-    def setup(self):
+    def _prepare(self):
         if self.view is None:
             self._view = MainView(self.application, self)
         if self.model is None:
             self.model = RandomModel()
             self.model.register_observer(self)
-        self.view.setup()
+        self.view.prepare()
         return self
 
     @property
@@ -40,14 +43,14 @@ class MainController(Poller, Observer):
         """
         return super(MainController, self).view
 
-    def start(self):
+    def _start(self):
         self.view.show()
 
     def execute(self):
         """Executed every x seconds"""
         self.model.update()
 
-    def stop(self):
+    def _stop(self):
         self.view.close()
 
     def update(self, observable):
@@ -99,7 +102,7 @@ class MainView(view.View):
         super(MainView, self).__init__(parent, controller)
         self._plot = None
 
-    def setup(self):
+    def _prepare(self):
         # resize with window size
         self.grid(sticky="nsew")
         self.configure_column(self, [0, 1, 2])

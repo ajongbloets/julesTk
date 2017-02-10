@@ -2,7 +2,12 @@
 
 """
 
-from . import tk, ThreadSafeObject
+import sys
+if sys.version_info[0] < 3:
+    import Tkinter as tk
+else:
+    import tkinter as tk
+from . import ThreadSafeObject
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -13,6 +18,8 @@ class Application(ThreadSafeObject, tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         super(Application, self).__init__()
+        self._configured = False
+        self.protocol("WM_DELETE_WINDOW", self.stop)
         self._controllers = {}
 
     @property
@@ -20,7 +27,7 @@ class Application(ThreadSafeObject, tk.Tk):
         """All controllers attached to this application
 
         :return: A dictionary of the name - controller mapping
-        :rtype: dict[str, pyLabJackView.controller.BaseController]
+        :rtype: dict[str, julesTk.controller.BaseController]
         """
         return self._controllers
 
@@ -71,15 +78,20 @@ class Application(ThreadSafeObject, tk.Tk):
             raise KeyError("No controller registered under: {}".format(name))
         self.controllers.pop(name)
 
-    def setup(self):
+    def prepare(self):
+        self._prepare()
+        self._configured = True
+        return self
+
+    def _prepare(self):
         """Configures the application and loads at least one controller"""
         raise NotImplementedError
 
     def run(self):
         """Start the application"""
         with self.lock:
-            # prepare the application
-            self.setup()
+            # _prepare the application
+            self.prepare()
             # now start the application
             self.start()
         # in the main loop we wait, so we do not need a lock
@@ -89,10 +101,19 @@ class Application(ThreadSafeObject, tk.Tk):
             self.stop()
 
     def start(self):
-        """Everything to show and run the applciation"""
+        if not self._configured:
+            self.prepare()
+        self._start()
+
+    def _start(self):
+        """Everything to show and run the application"""
         raise NotImplementedError
 
     def stop(self):
+        self._stop()
+
+    def _stop(self):
+        """Clean-up after execution"""
         while len(self.controllers) > 0:
             name = self.controllers.keys()[0]
             self.get_controller(name).stop()

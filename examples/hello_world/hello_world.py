@@ -9,19 +9,22 @@ class HelloWorld(app.Application):
     def __init__(self):
         super(HelloWorld, self).__init__()
 
-    def setup(self):
-        c = HelloWorldController(self).setup()
-        self.add_controller("main", c)
+    def _prepare(self):
+        self.add_controller("main", HelloWorldController(self))
 
-    def start(self):
-        self.get_controller("main").start()
+    @property
+    def main(self):
+        return self.get_controller("main")
+
+    def _start(self):
+        self.main.start()
 
 
 class HelloWorldView(view.View):
 
-    def setup(self):
+    def _prepare(self):
         # resize frame with window size
-        self.grid(sticky="nsew")
+        self.configure_grid(self)
         self.configure_row(self, 0)
         self.configure_column(self, 0)
         # parent should also resize with window
@@ -29,7 +32,7 @@ class HelloWorldView(view.View):
         self.configure_column(self.parent, 0)
         lbl = view.ttk.Label(self, text="Hello World!", font=self.FONT_LARGE)
         self.add_widget("label1", lbl)
-        lbl.grid(sticky="nsew", padx=10, pady=10)
+        self.configure_grid(lbl, padx=10, pady=10)
 
 
 class HelloWorldController(controller.ViewController):

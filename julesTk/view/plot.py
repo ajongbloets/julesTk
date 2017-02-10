@@ -1,7 +1,6 @@
 """Implement a Frame with a matplotlib"""
 
-from __future__ import absolute_import
-from . import *
+from julesTk.view import *
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -9,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 
 
-class PlotFrame(Frame):
+class PlotFrame(Frame, object):
 
     def __init__(self, parent):
         super(PlotFrame, self).__init__(parent)
@@ -110,7 +109,7 @@ class PlotView(View):
         """
         return self._plot
 
-    def setup(self):
+    def _prepare(self):
         self.configure_grid(self)
         self.setup_plot()
 

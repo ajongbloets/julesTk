@@ -1,3 +1,12 @@
+Version 0.3.0.alpha
+===================
+
+* Implement window and modal windows
+* Abstract setup/start/stop methods renamed to _prepare/_start/_stop
+* Window and Application hook into "WM_DELETE_WINDOW" event
+* Restructured views
+* Restructered controller
+
 Version 0.2.2
 =============
 
