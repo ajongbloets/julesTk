@@ -1,6 +1,7 @@
 """Model classes"""
 
-from julesTk import Observable, ThreadSafeObject
+from julesTk import ThreadSafeObject
+from julesTk.utils.observe import Observable
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -13,6 +14,7 @@ class Model(Observable, ThreadSafeObject):
 
     @property
     def data(self):
+        """RAW Representation of the data contained in the model"""
         with self.lock:
             result = self._data
         return result

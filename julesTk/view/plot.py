@@ -1,5 +1,6 @@
 """Implement a Frame with a matplotlib"""
 
+from __future__ import absolute_import
 from . import *
 
 import matplotlib

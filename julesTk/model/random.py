@@ -24,15 +24,15 @@ class RandomModel(Model):
             result = self._std
         return result
 
-    @Model.thread_safe
+    @Model.observed
     def reset(self):
-        self._data = []
-        self.notify_observers()
+        with self.lock:
+            self._data = []
 
     def generate(self):
         return random.gauss(self.mean, self.std)
 
-    @Model.thread_safe
+    @Model.observed
     def update(self):
-        self._data.append(self.generate())
-        self.notify_observers()
+        with self.lock:
+            self._data.append(self.generate())

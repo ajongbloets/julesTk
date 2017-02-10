@@ -1,3 +1,19 @@
+Version 0.2.2
+=============
+
+* Streamline app run/start/stop method names
+* Parent chaining of controllers and views
+* Use functools with decorators
+* Exception safe locking
+* Improve docstrings
+
+Version 0.2.1
+=============
+
+* Untangle controller classes from observer
+* Move observer-observable to utils
+* Add 'has_model' to controller
+
 Version 0.2.0.alpha
 ===================
 

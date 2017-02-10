@@ -1,5 +1,6 @@
 
 from julesTk import app, controller, view, model
+from julesTk.utils.observe import Observer
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -13,43 +14,20 @@ class ClickMeApp(app.Application):
         c = MainController(self).setup()
         self.add_controller("main", c)
 
-    def run(self):
-        self.get_controller("main").start()
-
-
-class MainController(controller.Controller):
-
-    def setup(self):
-        if self.view is None:
-            self._view = MainView(self.application, self)
-        if self.model is None:
-            self.model = ClickModel()
-            self.model.register_observer(self)
-        self.view.setup()
-        return self
-
     def start(self):
-        self.view.show()
-
-    def stop(self):
-        self.view.close()
-
-    def update(self, observable):
-        if isinstance(observable, ClickModel):
-            self.view.clicks = observable.data
-
-    def add_click(self):
-        self.model.update()
+        self.get_controller("main").start()
 
 
 class MainView(view.View):
 
     def setup(self):
+        # resize uniform over rows/columns with window
         self.grid(sticky="nsew")
         self.configure_column(self, [0, 1], uniform="foo")
         self.configure_row(self, [0, 1], uniform="foo")
-        self.parent.grid_columnconfigure(0, weight=1)
-        self.parent.grid_rowconfigure(0, weight=1)
+        # parent should also resize
+        self.configure_row(self.parent, 0)
+        self.configure_column(self.parent, 0)
         lbl = view.ttk.Label(self, text="Hello World!", font=self.FONT_LARGE)
         self.add_widget("label1", lbl)
         lbl.grid(sticky="nsew", columnspan=2, padx=10, pady=10)
@@ -79,17 +57,37 @@ class ClickModel(model.Model):
         super(ClickModel, self).__init__()
         self.reset()
 
-    @model.Model.thread_safe
     def reset(self):
-        self._data = 0
-
-    @model.Model.thread_safe
-    def update(self):
-        self._data += 1
+        with self.lock:
+            self._data = 0
         self.notify_observers()
+
+    def update(self):
+        with self.lock:
+            self._data += 1
+        self.notify_observers()
+
+
+class MainController(controller.Controller, Observer):
+
+    VIEW_CLASS = MainView
+
+    def setup(self):
+        super(MainController, self).setup()
+        if self.model is None:
+            self.model = ClickModel()
+            self.model.register_observer(self)
+        return self
+
+    def update(self, observable):
+        if isinstance(observable, ClickModel):
+            self.view.clicks = observable.data
+
+    def add_click(self):
+        self.model.update()
 
 
 if __name__ == "__main__":
 
     app = ClickMeApp()
-    app.start()
+    app.run()
