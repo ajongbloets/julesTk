@@ -1,12 +1,15 @@
 from julesTk.view import View
 
 
-class ViewSet(View):
-    """A viewset can contain one or more views"""
+class BaseViewSet(object):
+    """BaseViewSet mixin"""
 
-    def __init__(self, parent, controller):
-        super(ViewSet, self).__init__(parent, controller)
+    def __init__(self):
+        super(BaseViewSet, self).__init__()
         self._views = {}
+
+    def __del__(self):
+        self.close_views()
 
     @property
     def views(self):
@@ -49,21 +52,35 @@ class ViewSet(View):
         """Hide all Views"""
         for v in self._views.keys():
             self.hide_view(v)
-        # done
+            # done
 
     def hide_view(self, name):
         """Hide a specific View"""
         v = self.get_view(name)
         v.hide()
 
-    def _prepare(self):
+    def close_views(self):
+        while len(self.views.values()) > 0:
+            name = self.views.keys()[0]
+            self.close_view(name)
+
+    def close_view(self, name):
+        v = self.get_view(name)
+        v.close()
+        self.remove_view(name)
+
+
+class ViewSet(View, BaseViewSet):
+    """A view that can contain one or more other views"""
+
+    def __init__(self, parent, controller):
+        super(ViewSet, self).__init__(parent, controller)
+
+    def body(self):
         """Configure this ViewSet"""
         raise NotImplementedError
 
     def _close(self):
         """Close this ViewSet"""
-        while len(self.views.values()) > 0:
-            v = self.views.keys()[0]
-            self.get_view(v).close()
-            self.remove_view(v)
+        self.close_views()
         super(ViewSet, self)._close()

@@ -1,7 +1,8 @@
 """Provide Controller classes"""
 
+from julesTk.app import Application
 from julesTk.model import Model
-from julesTk.view import View, tk
+from julesTk.view import BaseView, View, tk
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -46,15 +47,19 @@ class BaseController(object):
     def parent(self):
         """Return reference to the parent object
 
-        :rtype: julesTk.app.Application
+        :rtype: julesTk.controller.BaseController or julesTk.app.Application
         """
         return self._parent
 
     @property
     def application(self):
+        """Return the application instance
+
+        :rtype: julesTk.app.Application
+        """
         result = self.parent
         if not isinstance(result, tk.Tk):
-            result = self.parent.parent
+            result = self.parent.application
         return result
 
 
@@ -117,7 +122,7 @@ class ViewController(BaseController):
         :return:
         :rtype: julesTk.view.View
         """
-        if not issubclass(self.VIEW_CLASS, View):
+        if not issubclass(self.VIEW_CLASS, BaseView):
             raise ValueError("Expected a view not {}".format(self.VIEW_CLASS.__name__))
         self._view = self.VIEW_CLASS(self.parent_view, self)
         return self.view

@@ -21,6 +21,7 @@ class Application(ThreadSafeObject, tk.Tk):
         self._configured = False
         self.protocol("WM_DELETE_WINDOW", self.stop)
         self._controllers = {}
+        self._hooks = {}
 
     @property
     def controllers(self):
@@ -78,6 +79,32 @@ class Application(ThreadSafeObject, tk.Tk):
             raise KeyError("No controller registered under: {}".format(name))
         self.controllers.pop(name)
 
+    def has_hook(self, name):
+        return name in self._hooks.keys()
+
+    def register_hook(self, name, f):
+        if self.has_hook(name):
+            self._hooks[name].append(f)
+        else:
+            self._hooks[name] = [f]
+        return self
+
+    def remove_hook(self, name, f):
+        if self.has_hook(name):
+            hooks = self._hooks[name]
+            if f in hooks:
+                hooks.remove(f)
+        return self
+
+    def process_hook(self, name):
+        hooks = []
+        if self.has_hook(name):
+            hooks = self._hooks[name]
+        result = True
+        for f in hooks:
+            result = f() and result
+        return result
+
     def prepare(self):
         self._prepare()
         self._configured = True
@@ -110,7 +137,9 @@ class Application(ThreadSafeObject, tk.Tk):
         raise NotImplementedError
 
     def stop(self):
-        self._stop()
+        # process app close hook
+        if self.process_hook("APP_CLOSE"):
+            self._stop()
 
     def _stop(self):
         """Clean-up after execution"""

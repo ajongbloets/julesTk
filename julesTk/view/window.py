@@ -1,6 +1,9 @@
 """Provides TopLevel views; i.e. Windows"""
 
 from julesTk.view import tk, BaseView
+from viewset import BaseViewSet
+
+__author__ = "Joeri Jongbloets <joeri@jongbloets>"
 
 
 class Window(tk.Toplevel, BaseView):
@@ -15,40 +18,22 @@ class Window(tk.Toplevel, BaseView):
 
     def _show(self):
         self.deiconify()
-        self.grab_set()
 
     def _hide(self):
         self.withdraw()
+        return True
 
     def _close(self):
         self.destroy()
+        return True
 
 
-class ModalWindow(Window):
-
-    def __init__(self, parent, controller):
-        super(ModalWindow, self).__init__(parent, controller)
-        self._response = None
-
-    @property
-    def response(self):
-        """Returns the input of the user given in the ModalWindow
-
-        Developers can use this communicate the input of the window to the controller
-        """
-        return self._response
-
-    @response.setter
-    def response(self, value):
-        self._response = value
+class WindowViewSet(Window, BaseViewSet):
+    """A window that can contain multiple views"""
 
     def _prepare(self):
         raise NotImplementedError
 
-    def _show(self):
-        self.transient(self.parent)
-        self.grab_set()
-        self.application.wait_window(self)
-
-    def _hide(self):
-        pass
+    def _close(self):
+        BaseViewSet.close_views(self)
+        return super(WindowViewSet, self)._close()

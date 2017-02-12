@@ -1,11 +1,12 @@
 Version 0.3.0.alpha
 ===================
 
+* Implement a basic hook system for application wide events
 * Implement window and modal windows
 * Abstract setup/start/stop methods renamed to _prepare/_start/_stop
 * Window and Application hook into "WM_DELETE_WINDOW" event
 * Restructured views
-* Restructered controller
+* Restructured controller
 
 Version 0.2.2
 =============

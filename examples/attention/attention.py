@@ -1,7 +1,6 @@
 
 from julesTk import app, controller, view
-from julesTk.controller.window import ModalWindowController
-from julesTk.view import window
+from julesTk.utils import modals
 
 
 class AttentionApp(app.Application):
@@ -16,7 +15,7 @@ class AttentionApp(app.Application):
     def main(self):
         return self.get_controller("main")
 
-    def start(self):
+    def _start(self):
         self.main.start()
 
 
@@ -26,9 +25,12 @@ class MainView(view.View):
         self.configure_grid(self)
         self.configure_column(self, [0, 1])
         self.configure_row(self, [0, 1])
-        btn = view.ttk.Button(self, text="Attention!", command=self.attention)
-        self.add_widget("button", btn)
-        self.configure_grid(btn, row=0, column=0, columnspan=2)
+        btn = view.ttk.Button(self, text="Attention 1", command=self.attention)
+        self.add_widget("button1", btn)
+        self.configure_grid(btn, row=0, column=0)
+        btn = view.ttk.Button(self, text="Attention 2", command=self.alert)
+        self.add_widget("button2", btn)
+        self.configure_grid(btn, row=0, column=1)
         lbd = view.ttk.Label(self, text="Your response:")
         self.add_widget("description", lbd)
         self.configure_grid(lbd, row=1, column=0)
@@ -40,6 +42,9 @@ class MainView(view.View):
 
     def attention(self):
         self.controller.attention()
+
+    def alert(self):
+        self.controller.alert()
 
     @property
     def response(self):
@@ -63,20 +68,28 @@ class MainController(controller.ViewController):
         if alert.response is False:
             self.view.response = "No"
 
+    def alert(self):
+        alert = modals.MessageBox(self.view, self, [
+            {'id': 'no', 'caption': 'No', 'value': "No", 'default': True},
+            {'id': 'yes', 'caption': 'Yes', 'value': "Yes"}
+        ])
+        alert.title = "YES or NO?"
+        alert.message = "YES or NO?"
+        alert.start()
+        self.view.response = alert.response
 
-class Alert(window.ModalWindow):
 
-    def _prepare(self):
-        self.grid()
-        self.configure_column(self, [0, 1, 2])
-        self.configure_row(self, [0, 1])
-        lbl = view.ttk.Label(self, text="YES or NO?")
+class Alert(modals.Dialog):
+
+    def body(self, parent):
+        lbl = view.ttk.Label(parent, text="YES or NO?")
         self.add_widget("label", lbl)
-        self.configure_grid(lbl, row=0, column=0, columnspan=3)
-        btn = view.ttk.Button(self, text="No", command=self.no)
+
+    def footer(self, parent):
+        btn = view.ttk.Button(parent, text="No", command=self.no)
         self.add_widget("no", btn)
         self.configure_grid(btn, row=1, column=0)
-        bty = view.ttk.Button(self, text="Yes", command=self.yes)
+        bty = view.ttk.Button(parent, text="Yes", command=self.yes)
         self.add_widget("yes", bty)
         self.configure_grid(bty, row=1, column=2)
 
@@ -84,18 +97,24 @@ class Alert(window.ModalWindow):
         self.no()
 
     def no(self):
-        self.response = False
+        self._response = False
         self.destroy()
 
     def yes(self):
-        self.response = True
+        self._response = True
         self.destroy()
 
 
-class AlertController(ModalWindowController):
+class AlertController(controller.ViewController):
 
     VIEW_CLASS = Alert
 
+    def _start(self):
+        return self.view.show()
+
+    @property
+    def response(self):
+        return self.view.response
 
 if __name__ == "__main__":
 

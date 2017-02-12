@@ -109,7 +109,7 @@ class PlotView(View):
         """
         return self._plot
 
-    def _prepare(self):
+    def body(self):
         self.configure_grid(self)
         self.setup_plot()
 

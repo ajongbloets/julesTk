@@ -7,6 +7,7 @@ if sys.version_info[0] < 3:
 else:
     import tkinter as tk
     from tkinter import ttk
+from julesTk.app import Application
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -79,15 +80,15 @@ class BaseView(BaseFrame):
         :rtype: Tkinter.Tk or tkinter.Tk
         """
         result = self.parent
-        if not isinstance(result, tk.Tk):
-            result = self.parent.parent
+        if not isinstance(result, Application):
+            result = self.parent.application
         return result
 
     @property
     def controller(self):
         """ The controller
 
-        :rtype: julesTk.controller.Controller
+        :rtype: julesTk.controller.BaseController
         """
         return self._controller
 
@@ -118,20 +119,19 @@ class BaseView(BaseFrame):
     def show(self):
         if not self._configured:
             self.prepare()
-        self._show()
-        return self
+        return self._show()
 
     def _show(self):
         raise NotImplementedError
 
     def hide(self):
-        self._hide()
+        return self._hide()
 
     def _hide(self):
         raise NotImplementedError
 
     def close(self):
-        self._close()
+        return self._close()
 
     def _close(self):
         raise NotImplementedError
@@ -247,14 +247,17 @@ class View(Frame, BaseView):
     def _show(self):
         """Shows the view"""
         self.tkraise()
+        return True
 
     def _hide(self):
         """Hides the view (temporarily)"""
         self.grid_remove()
+        return True
 
     def _close(self):
         """Closes the view"""
         self.destroy()
+        return True
 
     def _prepare(self):
         """Configure this view"""
