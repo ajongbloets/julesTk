@@ -76,7 +76,7 @@ class ViewSet(View, BaseViewSet):
     def __init__(self, parent, controller):
         super(ViewSet, self).__init__(parent, controller)
 
-    def body(self):
+    def _prepare(self):
         """Configure this ViewSet"""
         raise NotImplementedError
 
