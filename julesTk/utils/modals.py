@@ -179,6 +179,7 @@ class QuestionBox(Dialog):
             raise ValueError("Expected a controller not a {}".format(type(parent)))
         qb = cls(parent.view, parent)
         qb.question = question
+        qb._response = default
         qb.answer = default
         qb.show()
         return qb.response
