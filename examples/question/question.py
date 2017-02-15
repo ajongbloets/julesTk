@@ -22,9 +22,10 @@ class QuestionApp(app.Application):
 class MainView(view.View):
 
     def _prepare(self):
+        # prevent resize
+        self.application.resizable(False, False)
+        # layout this frame
         self.configure_grid(self)
-        self.configure_column(self, [0, 1])
-        self.configure_row(self, [0, 1])
         btn = view.ttk.Button(self, text="Ask!", command=self.ask_question)
         self.add_widget("button", btn)
         self.configure_grid(btn, row=0, column=0, columnspan=2)

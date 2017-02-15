@@ -22,9 +22,8 @@ class AttentionApp(app.Application):
 class MainView(view.View):
 
     def _prepare(self):
+        self.application.resizable(False, False)
         self.configure_grid(self)
-        self.configure_column(self, [0, 1])
-        self.configure_row(self, [0, 1])
         btn = view.ttk.Button(self, text="Attention 1", command=self.attention)
         self.add_widget("button1", btn)
         self.configure_grid(btn, row=0, column=0)
@@ -84,6 +83,7 @@ class Alert(modals.Dialog):
     def body(self, parent):
         lbl = view.ttk.Label(parent, text="YES or NO?")
         self.add_widget("label", lbl)
+        self.configure_grid(lbl)
 
     def footer(self, parent):
         btn = view.ttk.Button(parent, text="No", command=self.no)
@@ -94,6 +94,7 @@ class Alert(modals.Dialog):
         self.configure_grid(bty, row=1, column=2)
 
     def _close(self):
+        super(Alert, self)._close()
         self.no()
 
     def no(self):
