@@ -1,5 +1,8 @@
+"""Class implementing a ProgressBar Dialog"""
 
 from modals import view, SimpleDialog
+
+__author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
 class ProgressBar(SimpleDialog):

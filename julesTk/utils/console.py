@@ -2,7 +2,7 @@
 
 from julesTk import view
 
-__author__ = "Joeri Jongbloets <j.a.jongbloets@uva.nl>"
+__author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
 class LogView(view.Frame):

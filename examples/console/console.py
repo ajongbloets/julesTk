@@ -52,8 +52,13 @@ class MainView(view.View):
         if parent is None:
             parent = self
         log = self.get_widget("log")
+        btn = view.ttk.Button(parent, text="Close", command=self.exit)
+        btn.pack(side=view.tk.RIGHT)
         btc = view.ttk.Button(parent, text="Clear", command=log.clear)
         btc.pack(side=view.tk.RIGHT)
+
+    def exit(self):
+        self.application.stop()
 
 
 class MainController(poller.Poller, controller.ViewController):
