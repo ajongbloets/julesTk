@@ -39,6 +39,7 @@ class Dialog(ModalWindow):
     def __init__(self, parent, controller):
         super(Dialog, self).__init__(parent, controller)
         self._response = None
+        # self._prepare()
 
     @property
     def response(self):
@@ -90,7 +91,65 @@ class Dialog(ModalWindow):
         self.show()
 
 
-class MessageBox(Dialog):
+class SimpleDialog(Dialog):
+
+    def __init__(self, parent, controller, buttons=None):
+        super(SimpleDialog, self).__init__(parent, controller)
+        self._message = view.tk.StringVar("")
+        if buttons is None:
+            buttons = []
+        if len(buttons) == 0:
+            buttons = [{"id": "ok", "caption": "Ok", "value": True}]
+        self._buttons = buttons
+
+    @property
+    def message(self):
+        return self._message.get()
+
+    @message.setter
+    def message(self, v):
+        self._message.set(v)
+
+    def body(self, parent):
+        lbm = view.ttk.Label(parent, textvariable=self._message)
+        lbm.pack(side=view.tk.TOP, fill=view.tk.BOTH, expand=1)
+
+    def footer(self, parent):
+        idx = 0
+        for button in self._buttons:
+            # get button id
+            name = button.get("id", None)
+            if name is None:
+                name = idx
+                idx += 1
+            # get caption
+            caption = button.get("caption", name)
+            # get return value
+            value = button.get("value", name)
+            # check if set to default
+            is_default = button.get("default", False)
+            if is_default:
+                self._response = value
+            # add button
+            btn = self.make_button(parent, name, caption, value, is_default)
+            btn.pack(side=view.tk.LEFT, padx=5)
+
+    def make_button(self, parent, name, caption, value, is_default=False):
+        """Creates a button"""
+        default = view.tk.ACTIVE if is_default else view.tk.NORMAL
+        btn = view.ttk.Button(
+            parent, text=caption, default=default,
+            command=lambda i=value: self.process_click(i)
+        )
+        # register button in registry
+        self.add_widget(name, btn)
+        return btn
+
+    def process_click(self, value):
+        pass    # overload
+
+
+class MessageBox(SimpleDialog):
 
     def __init__(self, parent, controller, buttons=None):
         """ Initialize a MessageBox
@@ -103,14 +162,7 @@ class MessageBox(Dialog):
             A button definition is dictionary with the keys: id, caption, value
         :type buttons: list[dict[str, str | int | float]]
         """
-        super(MessageBox, self).__init__(parent, controller)
-        self._message = view.tk.StringVar("")
-        if buttons is None:
-            buttons = []
-        if len(buttons) == 0:
-            buttons = [{"id": "ok", "caption": "Ok", "value": True}]
-        self._buttons = buttons
-        self._functions = {}
+        super(MessageBox, self).__init__(parent, controller, buttons=buttons)
 
     @classmethod
     def alert(cls, parent, title, message, buttons=None):
@@ -121,44 +173,6 @@ class MessageBox(Dialog):
         mb.title = title
         mb.message = message
         mb.show()
-
-    @property
-    def message(self):
-        return self._message.get()
-
-    @message.setter
-    def message(self, value):
-        self._message.set(value)
-
-    def body(self, parent):
-        lbm = view.ttk.Label(parent, textvariable=self._message)
-        self.configure_grid(lbm, padx=10, pady=5)
-
-    def footer(self, parent):
-        idx = 0
-        for col, button in enumerate(self._buttons):
-            btn = None
-            # get button id
-            id_ = button.get("id", None)
-            if id_ is None:
-                id_ = idx
-                idx += 1
-            # get caption
-            caption = button.get("caption", id_)
-            # get return value
-            value = button.get("value", id_)
-            # check if set to default
-            default = button.get("default", False)
-            if default:
-                self._response = value
-            # add button
-            btn = view.ttk.Button(
-                parent, text=caption,
-                default=view.tk.ACTIVE if default else view.tk.NORMAL,
-                command=lambda i=value: self.process_click(i)
-            )
-            self.add_widget(id_, btn)
-            btn.pack(side=view.tk.LEFT, padx=5)
 
     def process_click(self, value):
         self._response = value
