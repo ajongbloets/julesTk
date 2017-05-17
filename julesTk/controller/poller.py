@@ -6,7 +6,7 @@ __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
 class Poller(Controller):
-    """Poller; a polling controller"""
+    """A controller that does something at a given interval"""
 
     def __init__(self, *args, **kwargs):
         super(Poller, self).__init__(*args, **kwargs)
@@ -31,9 +31,6 @@ class Poller(Controller):
         raise NotImplementedError
 
     def _start(self):
-        raise NotImplementedError
-
-    def update(self, observable):
         raise NotImplementedError
 
     def run(self):

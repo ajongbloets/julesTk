@@ -7,6 +7,7 @@ if sys.version_info[0] < 3:
 else:
     import tkinter as tk
     from tkinter import ttk
+
 from julesTk.app import Application
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
@@ -49,11 +50,33 @@ class Frame(ttk.Frame, BaseFrame):
 
 
 class BaseView(BaseFrame):
-    """Empty Base class used for checking if an object belongs to the view family"""
+    """Base View implementing most of the view functionality
+    
+    Preparation and loading of widgets
+    ----------------------------------
+    
+    Use _prepare() (abstract method) to prepare the view for showing. Including the creation of widgets. 
+    Call prepare() to execute preparation.
+    
+    Widgets and variables can be stored in a dictionary registry.
+    
+    Showing, hiding and closing
+    ---------------------------
+    
+    - call show() [ internal runs -> _show ]
+    _show (abstract method) implements the specific routine, need to for showing the view.
+    Call show() to execute this. show() will check if prepare() has been run before and run it necessary.
+    - call hide to temporarily hide the view
+    _hide() implements the specific routine for hiding the view.
+    - call close to destroy the view
+    _close() implements the specific routine for closing the view.
+    """
 
     def __init__(self, parent, controller):
         """Initialize a BaseView
 
+        :param parent: Parent view (or application)
+        :param controller: Controlling controller
         """
         super(BaseView, self).__init__()
         self._configured = False
@@ -92,6 +115,10 @@ class BaseView(BaseFrame):
         """
         return self._controller
 
+    @controller.setter
+    def controller(self, c):
+        self._controller = c
+
     @property
     def variables(self):
         """Variables registered to this view
@@ -108,6 +135,9 @@ class BaseView(BaseFrame):
         """
         return self._widgets
 
+    def is_configured(self):
+        return self._configured is True
+
     def prepare(self):
         self._prepare()
         self._configured = True
@@ -117,7 +147,7 @@ class BaseView(BaseFrame):
         raise NotImplementedError
 
     def show(self):
-        if not self._configured:
+        if not self.is_configured():
             self.prepare()
         return self._show()
 

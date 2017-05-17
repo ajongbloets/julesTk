@@ -1,3 +1,9 @@
+Version 0.3.1
+=============
+
+* New "console" widget, to use as stream output for logging
+* New "progress" dialog
+
 Version 0.3.0.alpha
 ===================
 
