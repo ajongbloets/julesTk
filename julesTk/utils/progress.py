@@ -6,8 +6,18 @@ __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
 class ProgressBar(SimpleDialog):
+    """Show a dialog with a progress bar
+    
+    """
 
     def __init__(self, parent, controller, mode="indeterminate", blocking=True):
+        """Initialize the progressbar
+        
+        :param parent: Parent view of this progressbar modal
+        :param controller: Controller controlling this progressbar (not used)
+        :param mode: Whether to show a determinate progress bar or indeterminate progress bar
+        :param blocking: If blocking, will block until closed by code
+        """
         self._value = view.tk.DoubleVar(0)
         self._mode = mode
         self._blocking = blocking
@@ -35,7 +45,7 @@ class ProgressBar(SimpleDialog):
         self._mode = v
         # update widget
         if self.has_widget("progress"):
-            self.get_widget("progress").config(mode = self._mode)
+            self.get_widget("progress").config(mode=self._mode)
 
     @property
     def value(self):
@@ -71,6 +81,10 @@ class ProgressBar(SimpleDialog):
         if self.is_blocking():
             self.get_widget("ok").config(state="disabled")
         super(ProgressBar, self)._show()
+
+    def _block(self):
+        if self.is_blocking():
+            super(ProgressBar, self)._block()
 
     def process_click(self, value):
         self._response = value

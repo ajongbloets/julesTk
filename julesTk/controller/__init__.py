@@ -10,17 +10,38 @@ __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 class BaseController(object):
     """A bare-bones controller, without view or model"""
 
+    STATE_INITIALIZED = 0
+    STATE_CONFIGURED = 1
+    STATE_STARTED = 2
+    STATE_STOPPED = -1
+
     def __init__(self, parent):
         super(BaseController, self).__init__()
         self._parent = parent
-        self._configured = False
+        self._state = self.STATE_INITIALIZED
 
     def __del__(self):
         self.stop()
 
+    @property
+    def state(self):
+        return self._state
+
+    def is_initialized(self):
+        return self.state == self.STATE_INITIALIZED
+
+    def is_configured(self):
+        return self.state == self.STATE_CONFIGURED
+
+    def is_running(self):
+        return self.state == self.STATE_STARTED
+
+    def is_stopped(self):
+        return self.state == self.STATE_STOPPED
+
     def prepare(self):
         self._prepare()
-        self._configured = True
+        self._state = self.STATE_CONFIGURED
         return self
 
     def _prepare(self):
@@ -29,8 +50,9 @@ class BaseController(object):
 
     def start(self):
         """Start the controller"""
-        if not self._configured:
+        if not self.is_configured():
             self.prepare()
+        self._state = self.STATE_STARTED
         return self._start()
 
     def _start(self):
@@ -38,6 +60,7 @@ class BaseController(object):
 
     def stop(self):
         """Stop the controller"""
+        self._state = self.STATE_STOPPED
         return self._stop()
 
     def _stop(self):

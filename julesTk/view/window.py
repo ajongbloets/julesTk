@@ -11,7 +11,16 @@ class Window(tk.Toplevel, BaseView):
     def __init__(self, parent, controller):
         tk.Toplevel.__init__(self, parent)
         BaseView.__init__(self, parent, controller)
-        self.protocol("WM_DELETE_WINDOW", self.close)
+        self.protocol("WM_DELETE_WINDOW", self.exit)
+
+    @property
+    def application(self):
+        result = self.parent
+        if isinstance(result, BaseView):
+            result = self.parent.application
+        if self.controller is not None:
+            result = self.controller.application
+        return result
 
     def _prepare(self):
         raise NotImplementedError
@@ -26,6 +35,9 @@ class Window(tk.Toplevel, BaseView):
     def _close(self):
         self.destroy()
         return True
+
+    def exit(self):
+        self.close()
 
 
 class WindowViewSet(Window, BaseViewSet):

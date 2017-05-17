@@ -4,7 +4,6 @@ Such as YES-NO, Question, Information dialogs etc.
 
 """
 
-from julesTk.controller.window import WindowController
 from julesTk import view, controller
 from julesTk.view.window import Window
 
@@ -24,6 +23,9 @@ class ModalWindow(Window):
         super(ModalWindow, self)._show()
         self.transient(self.parent)
         self.grab_set()
+        self._block()
+
+    def _block(self):
         self.application.wait_window(self)
 
     def _hide(self):
@@ -88,7 +90,10 @@ class Dialog(ModalWindow):
         return True  ## override
 
     def start(self):
-        self.show()
+        return self.show()
+
+    def stop(self):
+        return self.close()
 
 
 class SimpleDialog(Dialog):

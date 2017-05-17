@@ -7,7 +7,7 @@ if sys.version_info[0] < 3:
     import Tkinter as tk
 else:
     import tkinter as tk
-from . import ThreadSafeObject
+from julesTk import ThreadSafeObject
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
@@ -53,6 +53,17 @@ class Application(ThreadSafeObject, tk.Tk):
         :rtype: bool
         """
         return name in self.controllers.keys()
+
+    def is_registered(self, c):
+        """Check whether the given controller is registered"""
+        return c in self.controllers.values()
+
+    def get_registration_key(self, c):
+        """Return the name under which the controller is registered"""
+        for key in self.controllers.keys():
+            if self.get_controller(key) is c:
+                break
+        return key
 
     def add_controller(self, name, controller):
         """Registers a new controller under the given name
@@ -145,6 +156,8 @@ class Application(ThreadSafeObject, tk.Tk):
         """Clean-up after execution"""
         while len(self.controllers) > 0:
             name = self.controllers.keys()[0]
-            self.get_controller(name).stop()
+            controller = self.get_controller(name)
             self.remove_controller(name)
+            if controller.is_running():
+                controller.stop()
         tk.Tk.quit(self)

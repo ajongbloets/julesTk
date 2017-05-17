@@ -53,7 +53,7 @@ class MainController(poller.Poller, controller.ViewController):
         self.interval = 0.1
         self.run()
         self._pb.start()
-        self.set_polling(False)
+        self._pb.close()
 
     def execute(self):
         self._pb.value += 5
