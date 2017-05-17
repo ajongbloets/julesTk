@@ -15,7 +15,7 @@ class LogApp(app.Application):
     def _prepare(self):
         self.title('Console')
         self.geometry('500x500+200+200')
-        self.minsize(500, 300)
+        self.minsize(300, 300)
         self.add_controller("main", MainController(self))
 
     @property
@@ -29,13 +29,16 @@ class LogApp(app.Application):
 class MainView(view.View):
 
     def _prepare(self):
-        # pack this view
         self.pack(fill=view.tk.BOTH, expand=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         frmb = view.ttk.Frame(self, relief=view.tk.RAISED, borderwidth=1)
-        frmb.pack(side=view.tk.TOP, fill=view.tk.BOTH, expand=1)
+        frmb.grid(row=0, column=0, sticky="nsew")
+
         self._prepare_body(frmb)
         frmt = view.ttk.Frame(self, relief=view.tk.RAISED, borderwidth=1)
-        frmt.pack(side=view.tk.BOTTOM, fill=view.tk.X, expand=1)
+        frmt.grid(row=1, column=0, sticky="ew")
         self._prepare_tools(frmt)
 
     def _prepare_body(self, parent=None):
@@ -50,7 +53,7 @@ class MainView(view.View):
             parent = self
         log = self.get_widget("log")
         btc = view.ttk.Button(parent, text="Clear", command=log.clear)
-        btc.pack(side=view.tk.LEFT)
+        btc.pack(side=view.tk.RIGHT)
 
 
 class MainController(poller.Poller, controller.ViewController):

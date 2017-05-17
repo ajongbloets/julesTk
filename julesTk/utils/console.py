@@ -10,10 +10,28 @@ class LogView(view.Frame):
 
     def __init__(self, parent):
         super(LogView, self).__init__(parent=parent)
-        self._text = view.tk.Text(self)
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        xscroll = view.tk.Scrollbar(self, orient=view.tk.HORIZONTAL)
+        xscroll.grid(row=1, column=0, sticky="ew")
+
+        yscroll = view.tk.Scrollbar(self)
+        yscroll.grid(row=0, column=1, sticky="ns")
+
+        self._text = view.tk.Text(
+            self, wrap="none",
+            xscrollcommand=xscroll.set,
+            yscrollcommand=yscroll.set
+        )
         self._text.config(state="disabled")
         self._text.bind("<1>", lambda event: self._text.focus_set())
-        self._text.pack(fill=view.tk.BOTH, expand=1)
+
+        self._text.grid(row=0, column=0, sticky="nsew")
+
+        xscroll.config(command=self._text.xview)
+        yscroll.config(command=self._text.yview)
 
     @property
     def text(self):
