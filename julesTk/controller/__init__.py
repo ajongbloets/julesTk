@@ -95,6 +95,12 @@ class ViewController(BaseController):
         """Whether the controller has a view attached"""
         return self.view is not None
 
+    def set_view(self, v):
+        if not isinstance(v, BaseView):
+            raise ValueError("Expected a view not {}".format(v.__name__))
+        self._view = v
+        return self.view
+
     def _start(self):
         """Start the controller and open the view"""
         self.view.show()

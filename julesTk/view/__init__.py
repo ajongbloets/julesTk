@@ -115,10 +115,6 @@ class BaseView(BaseFrame):
         """
         return self._controller
 
-    @controller.setter
-    def controller(self, c):
-        self._controller = c
-
     @property
     def variables(self):
         """Variables registered to this view
