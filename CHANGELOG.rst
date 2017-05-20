@@ -1,3 +1,9 @@
+Version 0.3.3
+=============
+
+* Updated "progress" dialog, to a threaded version
+* Introduce states for views and controllers (is_showing, is_running, etc.)
+
 Version 0.3.1
 =============
 

@@ -8,6 +8,8 @@ The model is Thread-safe, but since Tk is not thread safe, the view and controll
 In threaded applications; use different threads to update the model and run a polling (using view.after) to update
 the view.
 
+Look at the examples for small showcases on how to use julesTk.
+
 Design structure
 ================
 
