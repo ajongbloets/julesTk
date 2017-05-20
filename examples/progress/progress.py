@@ -1,3 +1,11 @@
+"""Example of a application using a progress bar
+
+There are two buttons: determinate and indeterminate.
+
+- Determinate: will track the progress of our very long process and close automatically when done.
+- Indeterminate: Shows a "bouncing" progress bar not specific to progress.
+
+"""
 
 from julesTk import app, controller, view
 from julesTk.controller import poller
@@ -33,7 +41,7 @@ class MainView(view.View):
         self.configure_grid(btn, row=0, column=1)
 
 
-class MainController(poller.Poller, controller.ViewController):
+class MainController(controller.ViewController):
 
     VIEW_CLASS = MainView
 
@@ -48,24 +56,27 @@ class MainController(poller.Poller, controller.ViewController):
         controller.ViewController._start(self)
 
     def progress_det(self):
-        self._pb = progress.ProgressBar(self.view, self, mode="determinate", blocking=True)
-        self._pb.message = "Please wait.."
-        self.interval = 0.1
-        self.run()
-        self._pb.start()
-        self._pb.close()
+        self._pb = progress.ProgressBar(self.view, mode="determinate")
+        self._pb.view.title("Loading..")
+        self._pb.view.message = "Please wait.."
+        self._pb.view.geometry('300x100+200+200')
+        self._pb.start(self.long_process, block=True, auto_close=True)
 
-    def execute(self):
-        self._pb.value += 5
-        if self._pb.value == 100:
-            self.set_polling(False)
-            # self._pb.close()
+    def long_process(self):
+        import time
+        i = 0
+        while i < 100:
+            i += 5
+            self._pb.increase(5)
+            time.sleep(0.1)
+        return True
 
     def progress_indet(self):
-        pb = progress.ProgressBar(self.view, self, mode="indeterminate", blocking=False)
-        pb.message = "Please wait..."
-        pb.title("Operation in progress..")
-        pb.start()
+        self._pb = progress.ProgressBar(self.view, mode="indeterminate", auto_close=False)
+        self._pb.view.message = "Please wait..."
+        self._pb.view.title("Operation in progress..")
+        self._pb.view.geometry('300x100+200+200')
+        self._pb.start(self.long_process)
 
 
 if __name__ == "__main__":

@@ -16,10 +16,10 @@ class Window(tk.Toplevel, BaseView):
     @property
     def application(self):
         result = self.parent
-        if isinstance(result, BaseView):
-            result = self.parent.application
         if self.controller is not None:
             result = self.controller.application
+        elif isinstance(result, BaseView):
+            result = self.parent.application
         return result
 
     def _prepare(self):
@@ -33,6 +33,8 @@ class Window(tk.Toplevel, BaseView):
         return True
 
     def _close(self):
+        if self.controller is not None and not self.controller.is_stopped():
+            self.controller.stop()
         self.destroy()
         return True
 

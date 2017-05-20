@@ -72,6 +72,12 @@ class BaseView(BaseFrame):
     _close() implements the specific routine for closing the view.
     """
 
+    STATE_INITIALIZED = 0
+    STATE_CONFIGURED = 1
+    STATE_SHOWING = 2
+    STATE_HIDDEN = 3
+    STATE_CLOSED = -1
+
     def __init__(self, parent, controller):
         """Initialize a BaseView
 
@@ -79,7 +85,7 @@ class BaseView(BaseFrame):
         :param controller: Controlling controller
         """
         super(BaseView, self).__init__()
-        self._configured = False
+        self._view_state = self.STATE_INITIALIZED
         self._parent = parent
         self._controller = controller
         self._variables = {}
@@ -87,6 +93,25 @@ class BaseView(BaseFrame):
 
     def __del__(self):
         self.close()
+
+    @property
+    def view_state(self):
+        return self._view_state
+
+    def is_initialized(self):
+        return self.view_state == self.STATE_INITIALIZED
+
+    def is_configured(self):
+        return self.view_state == self.STATE_CONFIGURED
+
+    def is_showing(self):
+        return self.view_state == self.STATE_SHOWING
+
+    def is_hidden(self):
+        return self.view_state == self.STATE_HIDDEN
+
+    def is_closed(self):
+        return self.view_state == self.STATE_CLOSED
 
     @property
     def parent(self):
@@ -131,32 +156,32 @@ class BaseView(BaseFrame):
         """
         return self._widgets
 
-    def is_configured(self):
-        return self._configured is True
-
     def prepare(self):
         self._prepare()
-        self._configured = True
+        self._view_state = self.STATE_CONFIGURED
         return self
 
     def _prepare(self):
         raise NotImplementedError
 
     def show(self):
-        if not self.is_configured():
+        if self.view_state < self.STATE_CONFIGURED:
             self.prepare()
+        self._view_state = self.STATE_SHOWING
         return self._show()
 
     def _show(self):
         raise NotImplementedError
 
     def hide(self):
+        self._view_state = self.STATE_HIDDEN
         return self._hide()
 
     def _hide(self):
         raise NotImplementedError
 
     def close(self):
+        self._view_state = self.STATE_CLOSED
         return self._close()
 
     def _close(self):
@@ -282,6 +307,8 @@ class View(Frame, BaseView):
 
     def _close(self):
         """Closes the view"""
+        if self.controller is not None and not self.controller.is_stopped():
+            self.controller.stop()
         self.destroy()
         return True
 

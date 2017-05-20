@@ -2,18 +2,18 @@
 
 """
 
+from julesTk import ThreadSafeObject
 import sys
 if sys.version_info[0] < 3:
     import Tkinter as tk
 else:
     import tkinter as tk
-from julesTk import ThreadSafeObject
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
 class Application(ThreadSafeObject, tk.Tk):
-    """Application entry point"""
+    """Manage the application entry point"""
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -93,21 +93,43 @@ class Application(ThreadSafeObject, tk.Tk):
     def has_hook(self, name):
         return name in self._hooks.keys()
 
-    def register_hook(self, name, f):
+    def create_hook(self, name):
+        """Create a hook to which functions can be registered"""
         if self.has_hook(name):
-            self._hooks[name].append(f)
-        else:
-            self._hooks[name] = [f]
+            raise KeyError("Hook %s already exists" % name)
+        self._hooks[name] = []
+
+    def register_hook(self, name, f):
+        """Register a function to a hook
+        
+        - Use lambda to register a parametrized function
+        - Functions should return a boolean to report their success
+        """
+        if not self.has_hook(name):
+            self.create_hook(name)
+        self._hooks[name].append(f)
         return self
 
     def remove_hook(self, name, f):
+        """Remove the function registration from a hook"""
         if self.has_hook(name):
             hooks = self._hooks[name]
             if f in hooks:
                 hooks.remove(f)
         return self
 
+    def empty_hook(self, name):
+        """Remove all function registrations from a hook"""
+        if self.has_hook(name):
+            self._hooks[name] = []
+        return self
+
     def process_hook(self, name):
+        """Run all functions registered to the hook
+        
+        :return: Whether all functions ran successful
+        :rtype: bool
+        """
         hooks = []
         if self.has_hook(name):
             hooks = self._hooks[name]
@@ -132,28 +154,50 @@ class Application(ThreadSafeObject, tk.Tk):
             self.prepare()
             # now start the application
             self.start()
-        # in the main loop we wait, so we do not need a lock
-        self.mainloop()
+        self._execute()
         with self.lock:
             # clean up
             self.stop()
 
+    def _execute(self):
+        """Run the main loop"""
+        result = False
+        try:
+            self.mainloop()
+            result = True
+        except KeyboardInterrupt:
+            pass
+        return result
+
     def start(self):
         if not self._configured:
             self.prepare()
-        self._start()
+        # run all hooks associated with starting
+        if self.process_hook("APP_START"):
+            # if successful: start
+            self._start()
+        else:
+            # else exit immediately
+            self._stop()
 
     def _start(self):
         """Everything to show and run the application"""
         raise NotImplementedError
 
     def stop(self):
-        # process app close hook
+        # run all hooks associated with closing
         if self.process_hook("APP_CLOSE"):
+            # if hooks were successful: exit
             self._stop()
+        else:
+            # if hooks failed: keep in mainloop
+            self._execute()
 
     def _stop(self):
-        """Clean-up after execution"""
+        """Clean-up after execution
+        
+        Will request all controllers to clean-up and close
+        """
         while len(self.controllers) > 0:
             name = self.controllers.keys()[0]
             controller = self.get_controller(name)

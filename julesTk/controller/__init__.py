@@ -130,7 +130,8 @@ class ViewController(BaseController):
 
     def _stop(self):
         """Stop the controller and close the view managed by the view"""
-        self.view.close()
+        if not self.view.is_closed():
+            self.view.close()
 
     def _prepare(self):
         """Configure the controller and view.
