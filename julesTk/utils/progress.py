@@ -24,7 +24,7 @@ class ProgressBarView(SimpleDialog):
     
     """
 
-    def __init__(self, parent, controller, mode="indeterminate"):
+    def __init__(self, parent, controller, mode="indeterminate", cursor_wait=True):
         """Initialize the progressbar
         
         :param parent: Parent view of this progressbar modal
@@ -34,6 +34,7 @@ class ProgressBarView(SimpleDialog):
         self._value = view.tk.DoubleVar(0)
         self._mode = mode
         self._is_blocked = True
+        self._cursor_wait= cursor_wait
         buttons = [{"id": "ok", "caption": "Close", "value": False}]
         super(ProgressBarView, self).__init__(parent, controller, buttons=buttons)
 
@@ -70,6 +71,20 @@ class ProgressBarView(SimpleDialog):
             raise ValueError("Invalid value: {}".format(v))
         self._value.set(v)
 
+    @property
+    def cursor_wait(self):
+        return self._cursor_wait
+
+    @cursor_wait.setter
+    def cursor_wait(self, state):
+        self._cursor_wait = state
+        if self.is_showing():
+            self.update_cursor()
+
+    def _prepare(self):
+        super(ProgressBarView, self)._prepare()
+        self.bind("<Escape>", self.do_close)
+
     def body(self, parent):
         super(ProgressBarView, self).body(parent)
         pgb = view.ttk.Progressbar(parent)
@@ -79,7 +94,7 @@ class ProgressBarView(SimpleDialog):
         self.add_widget("progress", pgb)
 
     def footer(self, parent):
-        btc = view.ttk.Button(parent, text="Close", command=lambda: self.process_click(True))
+        btc = view.ttk.Button(parent, text="Close", command=self.do_close)
         self.add_widget("ok", btc)
         btc.pack(side=view.tk.BOTTOM)
 
@@ -89,20 +104,34 @@ class ProgressBarView(SimpleDialog):
         if self._is_blocked:
             self.get_widget("ok").config(state="disabled")
         super(ProgressBarView, self)._show()
+        self.update_cursor()
 
     def _block(self):
         return True
 
     def set_blocked(self, state):
         self._is_blocked = state is True
+        if self.is_showing():
+            self.update_cursor()
         if self.has_widget("ok"):
             self.get_widget("ok").config(state="disabled" if state else "normal")
             if not state:
                 self.get_widget("ok").focus_set()
 
-    def process_click(self, value):
+    def do_close(self, event=None):
         if not self._is_blocked:
             self.close()
+
+    def process_click(self, value):
+        self.do_close()
+
+    def update_cursor(self):
+        if self.cursor_wait and self._is_blocked:
+            self.application.config(cursor="wait")
+            self.config(cursor="wait")
+        else:
+            self.application.config(cursor="")
+            self.config(cursor="")
 
 
 class ProgressBar(threading.Thread):
