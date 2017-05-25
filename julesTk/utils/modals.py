@@ -12,6 +12,8 @@ __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 class ModalWindow(Window):
 
+    STATE_BLOCKED = 4
+
     def __init__(self, parent, controller):
         super(ModalWindow, self).__init__(parent, controller)
         self.application.register_hook("APP_CLOSE", self.hide)
@@ -25,7 +27,12 @@ class ModalWindow(Window):
         self.grab_set()
         self._block()
 
+    def block(self):
+        self._view_state = self.STATE_BLOCKED
+        return self._block()
+
     def _block(self):
+        self.update()
         self.application.wait_window(self)
 
     def _hide(self):
@@ -34,6 +41,9 @@ class ModalWindow(Window):
     def _close(self):
         self.application.remove_hook("APP_CLOSE", self.hide)
         super(ModalWindow, self)._close()
+
+    def is_blocked(self):
+        return self._view_state == self.STATE_BLOCKED
 
 
 class Dialog(ModalWindow):

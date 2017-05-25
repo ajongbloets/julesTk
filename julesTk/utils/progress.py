@@ -132,6 +132,7 @@ class ProgressBarView(SimpleDialog):
         else:
             self.application.config(cursor="")
             self.config(cursor="")
+        self.application.update_idletasks()
 
 
 class ProgressBar(threading.Thread):
@@ -280,9 +281,7 @@ class ProgressBar(threading.Thread):
             self._view.show()
             threading.Thread.start(self)
         if block:
-            while not self.is_finished.isSet():
-                # wait
-                self.view.update()
+            self.view.block()
         return self
 
     def run(self):
