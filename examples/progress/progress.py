@@ -31,7 +31,7 @@ class ProgressApp(app.Application):
 class MainView(view.View):
 
     def _prepare(self):
-        self.application.resizable(False, False)
+        self.root.resizable(False, False)
         self.configure_grid(self)
         btn = view.ttk.Button(self, text="Determinate", command=self.controller.progress_det)
         self.add_widget("button1", btn)

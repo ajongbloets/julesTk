@@ -28,7 +28,7 @@ class MainController(Poller, Observer):
 
     def _prepare(self):
         if self.view is None:
-            self._view = MainView(self.application, self)
+            self._view = MainView(self.root, self)
         if self.model is None:
             self.model = RandomModel()
             self.model.register_observer(self)

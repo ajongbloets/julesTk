@@ -3,12 +3,13 @@
 from threading import RLock
 
 import sys
+import functools
 if sys.version_info[0] < 3:
     import Tkinter as tk
+    import ttk
 else:
     import tkinter as tk
-import ttk
-import functools
+    from tkinter import ttk
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 

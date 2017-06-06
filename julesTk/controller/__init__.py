@@ -76,14 +76,19 @@ class BaseController(object):
 
     @property
     def application(self):
-        """Return the application instance
+        """The application controller
 
         :rtype: julesTk.app.Application
         """
         result = self.parent
-        if not isinstance(result, tk.Tk):
-            result = self.parent.application
+        if not isinstance(result, Application):
+            result = result.application
         return result
+
+    @property
+    def root(self):
+        """The root view"""
+        return self.parent.root
 
 
 class ViewController(BaseController):
@@ -112,6 +117,8 @@ class ViewController(BaseController):
         pview = self.parent
         if isinstance(pview, BaseController):
             pview = self.parent.view
+        if isinstance(pview, Application):
+            pview = self.parent.root
         return pview
 
     def has_view(self):

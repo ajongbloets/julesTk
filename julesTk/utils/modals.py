@@ -11,11 +11,12 @@ __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
 class ModalWindow(Window):
+    """A window taking all focus and blocking interaction with other windows"""
 
     STATE_BLOCKED = 4
 
-    def __init__(self, parent, controller):
-        super(ModalWindow, self).__init__(parent, controller)
+    def __init__(self, parent, ctrl):
+        super(ModalWindow, self).__init__(parent, ctrl)
         self.application.register_hook("APP_CLOSE", self.hide)
 
     def _prepare(self):
@@ -33,7 +34,7 @@ class ModalWindow(Window):
 
     def _block(self):
         self.update()
-        self.application.wait_window(self)
+        self.root.wait_window(self)
 
     def _hide(self):
         return False
@@ -47,9 +48,10 @@ class ModalWindow(Window):
 
 
 class Dialog(ModalWindow):
+    """Basic Dialog Window"""
 
-    def __init__(self, parent, controller):
-        super(Dialog, self).__init__(parent, controller)
+    def __init__(self, parent, ctrl):
+        super(Dialog, self).__init__(parent, ctrl)
         self._response = None
         # self._prepare()
 
@@ -86,18 +88,18 @@ class Dialog(ModalWindow):
 
     def header(self, parent):
         """Header of the dialog"""
-        return True  ## override
+        return True  # override
 
     def body(self, parent):
         """Build the body of the dialog, parent refers to parent frame"""
-        return True  ## override
+        return True  # override
 
     def footer(self, parent):
         """Build the buttons of the dialog, parent refers to parent frame"""
-        return True  ## override
+        return True  # override
 
     def validate(self):
-        return True  ## override
+        return True  # override
 
     def start(self):
         return self.show()
@@ -108,8 +110,8 @@ class Dialog(ModalWindow):
 
 class SimpleDialog(Dialog):
 
-    def __init__(self, parent, controller, buttons=None):
-        super(SimpleDialog, self).__init__(parent, controller)
+    def __init__(self, parent, ctrl, buttons=None):
+        super(SimpleDialog, self).__init__(parent, ctrl)
         self._message = view.tk.StringVar("")
         if buttons is None:
             buttons = []
@@ -166,28 +168,29 @@ class SimpleDialog(Dialog):
 
 class MessageBox(SimpleDialog):
 
-    def __init__(self, parent, controller, buttons=None):
+    def __init__(self, parent, ctrl, buttons=None):
         """ Initialize a MessageBox
 
-        :param parent:
-        :type parent:
-        :param controller:
-        :type controller:
+        :param parent: Reference to parent view
+        :type parent: julesTk.view.BaseView
+        :param ctrl: Reference to controller class
+        :type ctrl: julesTk.controller.BaseController
         :param buttons: List of button definitions.
             A button definition is dictionary with the keys: id, caption, value
         :type buttons: list[dict[str, str | int | float]]
         """
-        super(MessageBox, self).__init__(parent, controller, buttons=buttons)
+        super(MessageBox, self).__init__(parent, ctrl, buttons=buttons)
 
     @classmethod
     def alert(cls, parent, title, message, buttons=None):
         """Show an alert"""
-        if not isinstance(parent, controller.BaseController):
+        if not isinstance(parent, (view.tk.Tk, view.tk.Frame, view.BaseView)):
             raise ValueError("Expected a controller not a {}".format(type(parent)))
-        mb = cls(parent.view, parent, buttons=buttons)
+        mb = cls(parent, None, buttons=buttons)
         mb.title = title
         mb.message = message
         mb.show()
+        return mb.response
 
     def process_click(self, value):
         self._response = value
@@ -196,17 +199,17 @@ class MessageBox(SimpleDialog):
 
 class QuestionBox(Dialog):
 
-    def __init__(self, parent, controller):
-        super(QuestionBox, self).__init__(parent, controller)
+    def __init__(self, parent, ctrl):
+        super(QuestionBox, self).__init__(parent, ctrl)
         self._question = view.tk.StringVar(self)
         self._answer = view.tk.StringVar(self)
         self._error = view.tk.StringVar(self)
 
     @classmethod
     def ask(cls, parent, question, default=None):
-        if not isinstance(parent, controller.BaseController):
-            raise ValueError("Expected a controller not a {}".format(type(parent)))
-        qb = cls(parent.view, parent)
+        if not isinstance(parent, (view.tk.Tk, view.tk.Frame, view.BaseView)):
+            raise ValueError("Expected a view not a {}".format(type(parent)))
+        qb = cls(parent, None)
         qb.question = question
         qb._response = default
         qb.answer = default

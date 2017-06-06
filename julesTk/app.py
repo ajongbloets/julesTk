@@ -12,16 +12,22 @@ else:
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
-class Application(ThreadSafeObject, tk.Tk):
+class Application(ThreadSafeObject):
     """Manage the application entry point"""
 
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
+    def __init__(self, root=None, *args, **kwargs):
         super(Application, self).__init__()
+        if root is None:
+            root = tk.Tk()
+        self._root = root
         self._configured = False
-        self.protocol("WM_DELETE_WINDOW", self.stop)
+        self.root.protocol("WM_DELETE_WINDOW", self.stop)
         self._controllers = {}
         self._hooks = {}
+
+    @property
+    def root(self):
+        return self._root
 
     @property
     def controllers(self):
@@ -101,7 +107,7 @@ class Application(ThreadSafeObject, tk.Tk):
 
     def register_hook(self, name, f):
         """Register a function to a hook
-        
+
         - Use lambda to register a parametrized function
         - Functions should return a boolean to report their success
         """
@@ -126,7 +132,7 @@ class Application(ThreadSafeObject, tk.Tk):
 
     def process_hook(self, name):
         """Run all functions registered to the hook
-        
+
         :return: Whether all functions ran successful
         :rtype: bool
         """
@@ -163,7 +169,7 @@ class Application(ThreadSafeObject, tk.Tk):
         """Run the main loop"""
         result = False
         try:
-            self.mainloop()
+            self.root.mainloop()
             result = True
         except KeyboardInterrupt:
             pass
@@ -195,13 +201,13 @@ class Application(ThreadSafeObject, tk.Tk):
 
     def _stop(self):
         """Clean-up after execution
-        
+
         Will request all controllers to clean-up and close
         """
         while len(self.controllers) > 0:
-            name = self.controllers.keys()[0]
+            name = next(iter(self.controllers))
             controller = self.get_controller(name)
             self.remove_controller(name)
             if controller.is_running():
                 controller.stop()
-        tk.Tk.quit(self)
+        tk.Tk.quit(self.root)

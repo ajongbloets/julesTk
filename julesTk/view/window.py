@@ -1,7 +1,7 @@
 """Provides TopLevel views; i.e. Windows"""
 
 from julesTk.view import tk, BaseView
-from viewset import BaseViewSet
+from julesTk.view.viewset import BaseViewSet
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets>"
 
@@ -12,6 +12,19 @@ class Window(tk.Toplevel, BaseView):
         tk.Toplevel.__init__(self, parent)
         BaseView.__init__(self, parent, controller)
         self.protocol("WM_DELETE_WINDOW", self.exit)
+
+    @property
+    def root(self):
+        """Return the root view
+
+        :rtype: Tkinter.Tk or tkinter.Tk
+        """
+        result = self.parent
+        if self.controller is not None:
+            result = self.controller.root
+        elif isinstance(result, BaseView):
+            result = self.parent.root
+        return result
 
     @property
     def application(self):

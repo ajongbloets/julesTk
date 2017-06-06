@@ -23,7 +23,7 @@ class MainView(view.View):
 
     def _prepare(self):
         # prevent resize
-        self.application.resizable(False, False)
+        self.root.resizable(False, False)
         # layout this frame
         self.configure_grid(self)
         btn = view.ttk.Button(self, text="Ask!", command=self.ask_question)
@@ -56,7 +56,7 @@ class MainController(controller.ViewController):
 
     def ask_question(self):
         self.view.response = QuestionBox.ask(
-            self, "What is your name?"
+            self.view, "What is your name?"
         )
 
 

@@ -13,9 +13,9 @@ class LogApp(app.Application):
         super(LogApp, self).__init__()
 
     def _prepare(self):
-        self.title('Console')
-        self.geometry('500x500+200+200')
-        self.minsize(300, 300)
+        self.root.title('Console')
+        self.root.geometry('500x500+200+200')
+        self.root.minsize(300, 300)
         self.add_controller("main", MainController(self))
 
     @property

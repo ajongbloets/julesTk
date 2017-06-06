@@ -51,18 +51,18 @@ class Frame(ttk.Frame, BaseFrame):
 
 class BaseView(BaseFrame):
     """Base View implementing most of the view functionality
-    
+
     Preparation and loading of widgets
     ----------------------------------
-    
-    Use _prepare() (abstract method) to prepare the view for showing. Including the creation of widgets. 
+
+    Use _prepare() (abstract method) to prepare the view for showing. Including the creation of widgets.
     Call prepare() to execute preparation.
-    
+
     Widgets and variables can be stored in a dictionary registry.
-    
+
     Showing, hiding and closing
     ---------------------------
-    
+
     - call show() [ internal runs -> _show ]
     _show (abstract method) implements the specific routine, need to for showing the view.
     Call show() to execute this. show() will check if prepare() has been run before and run it necessary.
@@ -122,14 +122,25 @@ class BaseView(BaseFrame):
         return self._parent
 
     @property
-    def application(self):
-        """Return the root level widget
+    def root(self):
+        """Return the root view
 
         :rtype: Tkinter.Tk or tkinter.Tk
         """
         result = self.parent
+        if isinstance(result, BaseView):
+            result = self.parent.root
+        return result
+
+    @property
+    def application(self):
+        """Return the Application controller
+
+        :rtype: julesTk.app.Application
+        """
+        result = self.controller.parent
         if not isinstance(result, Application):
-            result = self.parent.application
+            result = result.application
         return result
 
     @property

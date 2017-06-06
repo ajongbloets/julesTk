@@ -14,14 +14,22 @@ Design structure
 ================
 
 MVC: Model-View-Controller, is a well-known and wide practiced design paradigm for designing Graphical User Interfaces (GUI's).
+Using a MVC approach makes writing complex applications easier as software with this approach is more modular.
 
-Jules-tk provides the MVC structure, similar to what web-frameworks as django do. There is one entry-point to the application
-(app.py) which will load controllers. The controllers will then initialize the models it needs and the view it works with.
+Tkinter: The default GUI framework of python. Although not the most beautiful around it does not require (complex)
+dependencies and is therefore very portable.
+
+Application
+-----------
+
+Main controller responsible for configuring the application and managing the mainloop. Keeps track of all controllers
+ loaded in the application.
 
 The Controller
 --------------
 
-Controller serve as the logic hub of the application and bridge from view and model.
+A Controller serves as the logic hub of the application and as a bridge between a view and model. It is important to
+understand that julesTk drives on a strict one-to-one relation between controller and view!
 
 The View
 --------
@@ -61,13 +69,30 @@ Application flow
 
 While in the main loop
 
-1. view receives to user input
+1. view receives user input
 2. view calls controller
 3. controller handles input - acts on model
-5. controller handles update - acts on view
+4. controller handles update - acts on view
+
+Modals
+======
+
+Basic functionality for modal window have been implemented. These windows allow to block input to any other window
+than  the modal window. This allows for the creation of Dialogs (such as alert boxes, question boxes or progress
+dialogs). A basic implementation of these dialog is made in the utils subpackage.
+
+Modal windows can be used with a MVC approach but also in a quick and dirty view-only manner. This latter is suitable
+for simple dialogs.
 
 Plotting
 ========
 
 Basic plotting is implemented using matplotlib with the `plot.Plot` Widget.
 See the `random_plot` example for a demonstration.
+
+
+Future plans
+============
+
+* Support events
+* Implement validating models/variables for dialogs (or other widgets)

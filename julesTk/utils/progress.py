@@ -13,7 +13,7 @@ Options
 
 """
 
-from modals import view, SimpleDialog
+from julesTk.utils.modals import view, SimpleDialog
 import threading
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
@@ -21,12 +21,12 @@ __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 class ProgressBarView(SimpleDialog):
     """Show a dialog with a progress bar
-    
+
     """
 
     def __init__(self, parent, controller, mode="indeterminate", cursor_wait=True):
         """Initialize the progressbar
-        
+
         :param parent: Parent view of this progressbar modal
         :param controller: Controller controlling this progressbar (not used)
         :param mode: Whether to show a determinate progress bar or indeterminate progress bar
@@ -120,6 +120,7 @@ class ProgressBarView(SimpleDialog):
 
     def do_close(self, event=None):
         if not self._is_blocked:
+            self.update_cursor()
             self.close()
 
     def process_click(self, value):
@@ -127,19 +128,19 @@ class ProgressBarView(SimpleDialog):
 
     def update_cursor(self):
         if self.cursor_wait and self._is_blocked:
-            self.application.config(cursor="wait")
+            self.root.config(cursor="wait")
             self.config(cursor="wait")
         else:
-            self.application.config(cursor="")
+            self.root.config(cursor="")
             self.config(cursor="")
-        self.application.update_idletasks()
+        self.root.update_idletasks()
 
 
 class ProgressBar(threading.Thread):
     """Show a progress bar and run a (long) process in the background
-    
+
     Creates and manages the ProgressBar Dialog.
-    
+
     """
 
     def __init__(self, parent, command=None, mode="indeterminate", maximum=100, auto_close=False):
@@ -157,7 +158,7 @@ class ProgressBar(threading.Thread):
         :type auto_close: boolean
         :rtype: julesTk.utils.progress.ProgressBar
         """
-        super(ProgressBar, self).__init__()
+        threading.Thread.__init__(self)
         self._view = ProgressBarView(parent, None, mode=mode)
         self._auto_close = auto_close
         self._command = command

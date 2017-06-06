@@ -22,7 +22,7 @@ class AttentionApp(app.Application):
 class MainView(view.View):
 
     def _prepare(self):
-        self.application.resizable(False, False)
+        self.root.resizable(False, False)
         self.configure_grid(self)
         btn = view.ttk.Button(self, text="Attention 1", command=self.attention)
         self.add_widget("button1", btn)
@@ -30,6 +30,9 @@ class MainView(view.View):
         btn = view.ttk.Button(self, text="Attention 2", command=self.alert)
         self.add_widget("button2", btn)
         self.configure_grid(btn, row=0, column=1)
+        btn = view.ttk.Button(self, text="Attention 3", command=self.alert)
+        self.add_widget("button3", btn)
+        self.configure_grid(btn, row=0, column=2)
         lbd = view.ttk.Label(self, text="Your response:")
         self.add_widget("description", lbd)
         self.configure_grid(lbd, row=1, column=0)
@@ -37,10 +40,13 @@ class MainView(view.View):
         self.add_variable("response", response)
         lbr = view.ttk.Label(self, textvariable=response)
         self.add_widget("response", lbr)
-        self.configure_grid(lbr, row=1, column=1)
+        self.configure_grid(lbr, row=1, column=1, columnspan=2)
 
     def attention(self):
         self.controller.attention()
+
+    def custom_dialog(self):
+        self.controller.custom_dialog()
 
     def alert(self):
         self.controller.alert()
@@ -67,8 +73,8 @@ class MainController(controller.ViewController):
         if alert.response is False:
             self.view.response = "No"
 
-    def alert(self):
-        alert = modals.MessageBox(self.view, self, [
+    def custom_dialog(self):
+        alert = modals.MessageBox(self.view, None, buttons=[
             {'id': 'no', 'caption': 'No', 'value': "No", 'default': True},
             {'id': 'yes', 'caption': 'Yes', 'value': "Yes"}
         ])
@@ -76,6 +82,16 @@ class MainController(controller.ViewController):
         alert.message = "YES or NO?"
         alert.start()
         self.view.response = alert.response
+
+    def alert(self):
+        buttons = [
+            {'id': 'no', 'caption': 'No', 'value': "No", 'default': True},
+            {'id': 'yes', 'caption': 'Yes', 'value': "Yes"}
+        ]
+        response = modals.MessageBox.alert(
+            parent=self.view, title="YES or NO?", message="YES or NO?", buttons=buttons
+        )
+        self.view.response = response
 
 
 class Alert(modals.Dialog):
@@ -93,17 +109,13 @@ class Alert(modals.Dialog):
         self.add_widget("yes", bty)
         self.configure_grid(bty, row=1, column=2)
 
-    def _close(self):
-        super(Alert, self)._close()
-        self.no()
-
     def no(self):
         self._response = False
-        self.destroy()
+        self.close()
 
     def yes(self):
         self._response = True
-        self.destroy()
+        self.close()
 
 
 class AlertController(controller.ViewController):

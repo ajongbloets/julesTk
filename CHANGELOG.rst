@@ -1,3 +1,10 @@
+Version 0.3.4
+=============
+
+* [BUG] Fixed compatibility with python 3 (tested 3.6)
+* [BUG] Fixed examples
+* Implement properties for application (Application Controller) and root (tk.TK)
+
 Version 0.3.3
 =============
 
