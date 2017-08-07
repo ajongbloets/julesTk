@@ -22,14 +22,15 @@ dependencies and is therefore very portable.
 Application
 -----------
 
-Main controller responsible for configuring the application and managing the mainloop. Keeps track of all controllers
- loaded in the application.
+The main controller is responsible for configuring the application and managing the mainloop. It also keeps track of all
+controllers loaded in the application.
 
 The Controller
 --------------
 
-A Controller serves as the logic hub of the application and as a bridge between a view and model. It is important to
-understand that julesTk drives on a strict one-to-one relation between controller and view!
+A Controller serves as the logic hub of the application and as a bridge between the view and model. It is important to
+understand that julesTk requires a strict one-to-one relation between controller and view! This can be an issue when
+ you create dialogs in a view-only manner and providing a controller that is also used with another view.
 
 The View
 --------
