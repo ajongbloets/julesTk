@@ -146,7 +146,7 @@ class Listbox(FrameView):
 
     def _prepare_list(self, parent):
         lb = tk.Listbox(parent, height="8", borderwidth=0)
-        lb.bind("<Double-Button-1>", self.edit_item)
+        lb.bind("<Double-Button-1>", self.view_item)
         lb.bind("<Button-2>", self.show_popup)
         self._prepare_scrollbar(parent, lb)
         self.add_widget("list_model", lb)
@@ -193,6 +193,11 @@ class Listbox(FrameView):
             if item is not None:
                 results.append(item)
         return results
+
+    def view_item(self, event=None):
+        item = self.get_selected_item()
+        if item is not None:
+            self.trigger_event("view_item", data=item)
 
     def add_item(self, event=None):
         self.trigger_event("add_item")
@@ -279,21 +284,29 @@ class ListboxController(ViewController):
         super(ListboxController, self)._stop()
 
     @receives("clear_list")
-    def event_clear_list(self, *args):
+    def _event_clear_list(self, *args):
         self.clear_list()
 
     def clear_list(self):
         self.list_model.clear()
 
     @receives("add_item")
-    def event_add_item(self, *args):
+    def _event_add_item(self, *args):
         self.add_item()
 
     def add_item(self):
         pass    # overload
 
+    @receives("view_item")
+    def _event_view_item(self, event, source, item=None):
+        if item is not None:
+            self.view_item(item)
+
+    def view_item(self, item):
+        pass    # overload
+
     @receives("edit_item")
-    def event_edit_item(self, event, source, item=None):
+    def _event_edit_item(self, event, source, item=None):
         if item is not None:
             self.edit_item(item)
 
@@ -301,7 +314,7 @@ class ListboxController(ViewController):
         pass    # overload
 
     @receives("delete_item")
-    def event_delete_item(self, event, source, item=None):
+    def _event_delete_item(self, event, source, item=None):
         if item is not None:
             self.delete_item(item)
 

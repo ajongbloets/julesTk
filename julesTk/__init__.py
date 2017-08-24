@@ -2,6 +2,7 @@
 
 from threading import RLock
 
+import six
 import sys
 import functools
 if sys.version_info[0] < 3:
@@ -21,7 +22,11 @@ class JTkMeta(type):
     """A meta object"""
 
     @staticmethod
-    def __new__(mcs, name, bases, attrs):
+    def __new__(mcs, name, bases=None, attrs=None):
+        if bases is None:
+            bases = []
+        if attrs is None:
+            attrs = {}
         result = super(JTkMeta, mcs).__new__(mcs, name, bases, attrs)
         # setattr(result, "class_event_hooks", class_event_hooks)
         # setattr(result, "class_event_slots", class_event_slots)
@@ -42,7 +47,7 @@ class JTkMeta(type):
         # setattr(result, "class_event_slots", class_event_slots)
         return result
 
-    def __init__(cls, name, bases, attrs):
+    def __init__(cls, name, bases=None, attrs=None):
         class_event_hooks = set()
         class_event_slots = {}
         attributes = filter(lambda a: hasattr(cls, a), dir(cls))
@@ -62,11 +67,9 @@ class JTkMeta(type):
         cls.class_event_slots = class_event_slots
         super(JTkMeta, cls).__init__(name, bases, attrs)
 
-
+@six.add_metaclass(JTkMeta)
 class JTkObject(object):
     """A julesTk object; comes with a event-driven communication system"""
-
-    __metaclass__ = JTkMeta
 
     def __init__(self):
         super(JTkObject, self).__init__()
@@ -85,7 +88,8 @@ class JTkObject(object):
     def __del__(self):
         # check if we passed __init__
         if hasattr(self, "_event_observers"):
-            for observer in self._event_observers:
+            while len(self._event_observers) > 0:
+                observer = next(iter(self._event_observers))
                 self.remove_observer(observer)
                 if isinstance(observer, JTkObject):
                     observer.remove_observer(self)
@@ -163,7 +167,8 @@ class JTkObject(object):
             for handler in handlers:
                 if callable(handler):
                     try:
-                        if hasattr(handler, "im_self"):
+                        import inspect
+                        if 'self' in inspect.getargspec(handler).args:
                             handler(self, event, source, data)
                         else:
                             handler(event, source, data)

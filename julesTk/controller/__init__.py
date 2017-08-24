@@ -60,31 +60,33 @@ class BaseController(JTkObject):
 
     def start(self):
         """Start the controller"""
+        result = True
         if not self.is_configured():
             self.prepare()
-        self.trigger_event("controller_start")
-        self._state = self.STATE_STARTED
-        return self._start()
+        if not self.is_running():
+            self.trigger_event("controller_start")
+            self._state = self.STATE_STARTED
+            result = self._start()
+        return result
 
     def _start(self):
-        raise NotImplementedError
+        return True     # overload
 
     def stop(self):
         """Stop the controller"""
-        self._state = self.STATE_STOPPED
-        self.trigger_event("controller_stop")
-        return self._stop()
+        result = True
+        if not self.is_stopped():
+            self._state = self.STATE_STOPPED
+            self.trigger_event("controller_stop")
+            result = self._stop()
+        return result
 
     @receives("application_stop")
-    def event_application_stop(self, *args):
-        self.application_stop()
-
-    def application_stop(self):
-        if not self.is_stopped():
-            self.stop()
+    def _event_application_stop(self, *args):
+        self.stop()
 
     def _stop(self):
-        raise NotImplementedError
+        return True     # overload
 
     @property
     def parent(self):
@@ -164,14 +166,6 @@ class ViewController(BaseController):
             v.add_observer(self)
             self.add_observer(v)
         return self.view
-
-    def _start(self):
-        """Start the controller and open the view"""
-        return self.view.show()
-
-    def _stop(self):
-        """Stop the controller and close the view managed by the view"""
-        return True
 
     @receives("view_close")
     def view_close(self, *args):

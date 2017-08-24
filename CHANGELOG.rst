@@ -1,3 +1,11 @@
+Version 0.3.5
+=============
+
+* [Improvement] Reduce dependencies between views and controllers.
+* Implement event system
+* Move modal dialogs to own subpackage
+* A MVC-style Listbox Widget (for now in view package)
+
 Version 0.3.4
 =============
 

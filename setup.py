@@ -78,6 +78,7 @@ setup(
     install_requires=[
         #'TkInter',
         #'ttk',
+        'six',
     ],
 
     # List additional groups of dependencies here (e.g. development

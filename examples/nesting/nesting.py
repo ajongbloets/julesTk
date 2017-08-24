@@ -11,6 +11,7 @@ class NestedApp(app.Application):
 
     def _prepare(self):
         self.add_controller("main", MainController(self))
+        return True
 
     @property
     def main(self):
@@ -31,9 +32,9 @@ class MainView(view.FrameView):
         self.configure_row(self, [0, 1])
         self.configure_column(self, 0)
         # initialize child
-        # self.controller.child.start()
+        child = self.add_widget("child", ChildView(self))
         # add child on first row
-        self.configure_grid(self.controller.child.view, row=0, column=0)
+        self.configure_grid(child, row=0, column=0)
         # add main text
         lbl = view.ttk.Label(self, text='Label in MainView')
         self.add_widget('label1', lbl)
@@ -54,8 +55,9 @@ class MainController(controller.ViewController):
         return self._child
 
     def start(self):
-        self.child.start()
         super(MainController, self).start()
+        child = self.view.get_widget("child")
+        self.child.set_view(child)
 
 
 class ChildView(view.FrameView):
