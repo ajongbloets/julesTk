@@ -167,6 +167,9 @@ class JTkView(JTkObject):
         raise NotImplementedError
 
     @receives("controller_start")
+    def _event_controller_start(self, *args):
+        self.show()
+
     def show(self):
         if self.view_state < self.STATE_CONFIGURED:
             self.prepare()
@@ -182,6 +185,10 @@ class JTkView(JTkObject):
 
     def _hide(self):
         raise NotImplementedError
+
+    @receives("controller_stop")
+    def _event_controller_stop(self, *args):
+        self.close()
 
     @triggers("view_close", before=True)
     def close(self):

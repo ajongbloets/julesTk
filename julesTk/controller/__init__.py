@@ -76,6 +76,9 @@ class BaseController(JTkObject):
         return self._stop()
 
     @receives("application_stop")
+    def event_application_stop(self, *args):
+        self.application_stop()
+
     def application_stop(self):
         if not self.is_stopped():
             self.stop()
@@ -171,7 +174,7 @@ class ViewController(BaseController):
         return True
 
     @receives("view_close")
-    def view_close(self, event, source, data=None):
+    def view_close(self, *args):
         self.stop()
 
     def _prepare(self):

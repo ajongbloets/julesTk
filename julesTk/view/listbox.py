@@ -14,6 +14,7 @@ __all__ = [
     "ListModel", "Listbox", "ListboxController"
 ]
 
+
 class ListModel(JTkObject):
 
     def __init__(self):
@@ -48,9 +49,9 @@ class ListModel(JTkObject):
     def remove(self, item):
         result = None
         if item in self._data:
+            self.trigger_event("item_removed", item)
             self._data.remove(item)
             result = item
-            self.trigger_event("item_removed", result)
         return result
 
     def pop(self, index):
@@ -68,11 +69,18 @@ class ListModel(JTkObject):
     def __contains__(self, item):
         return item in self._data
 
+    def __len__(self):
+        return self.size
+
+    def __iter__(self):
+        return self._data.__iter__()
+
 
 class Listbox(FrameView):
 
-    def __init__(self, parent, controller=None):
+    def __init__(self, parent, controller=None, title=None):
         super(Listbox, self).__init__(parent, controller=controller)
+        self._title = title
 
     @property
     def listbox_widget(self):
@@ -82,6 +90,17 @@ class Listbox(FrameView):
         :rtype: Tkinter.Listbox | tkinter.Listbox
         """
         return self.get_widget("list_model")
+
+    @property
+    def title(self):
+        return self._title
+
+    @title.setter
+    def title(self, value):
+        self._title = value
+        # if view is already prepared, there is a title widget registered, which we need to update
+        if self.has_widget("title"):
+            self.get_widget("title").configure(text=self.title)
 
     def get_controller(self):
         """Return the Controller of this view
@@ -98,19 +117,25 @@ class Listbox(FrameView):
         return result
 
     def _prepare(self):
+        # header
         frmh = ttk.Frame(self)
         frmh.grid(row=0, column=0, padx=5, sticky="nwe")
         self._prepare_header(frmh)
+        # list box
         frml = ttk.Frame(self, borderwidth=2, relief="sunken")
         # frml.pack(side="top", fill=view.tk.BOTH, expand=1, padx=5)
         frml.grid(row=1, column=0, padx=5, sticky="nswe")
         self._prepare_list(frml)
+        # footer
+        frmf = ttk.Frame(self)
+        frmf.grid(row=2, column=0, padx=5, sticky="swe")
+        self._prepare_footer(frmf)
         # configure grid
         self.configure_column(self, 0)
         self.configure_row(self, 1)
 
     def _prepare_header(self, parent):
-        lbl = ttk.Label(parent)
+        lbl = ttk.Label(parent, text=self.title)
         lbl.pack(side="left", fill="x", padx=5)
         self.add_widget("title", lbl)
         self._prepare_buttons(parent)
@@ -140,16 +165,29 @@ class Listbox(FrameView):
             scbx.pack(side='bottom', fill='x')
             widget.pack(side="top", fill="both", expand=1)
 
+    def _prepare_footer(self, parent):
+        pass
+
+    def get_selected_indexes(self):
+        return self.listbox_widget.curselection()
+
+    def get_selected_index(self):
+        result = None
+        indexes = self.get_selected_indexes()
+        if len(indexes) > 0:
+            result = indexes[0]
+        return result
+
     def get_selected_item(self):
         result = None
-        indexes = self.listbox_widget.curselection()
-        if len(indexes) > 0:
-            result = self.get_list().get(indexes[0])
+        index = self.get_selected_index()
+        if index is not None:
+            result = self.get_list().get(index)
         return result
 
     def get_selected_items(self):
         results = []
-        indexes = self.listbox_widget.curselection()
+        indexes = self.get_selected_indexes()
         for index in indexes:
             item = self.get_list().get(index)
             if item is not None:

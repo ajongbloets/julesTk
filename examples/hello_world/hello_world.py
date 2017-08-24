@@ -11,6 +11,7 @@ class HelloWorld(app.Application):
 
     def _prepare(self):
         self.add_controller("main", HelloWorldController(self))
+        return True
 
     @property
     def main(self):
@@ -33,6 +34,7 @@ class HelloWorldView(view.FrameView):
         lbl = view.ttk.Label(self, text="Hello World!", font=self.FONT_LARGE)
         self.add_widget("label1", lbl)
         self.configure_grid(lbl, padx=10, pady=10)
+        return True
 
 
 class HelloWorldController(controller.ViewController):
