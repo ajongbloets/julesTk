@@ -20,7 +20,7 @@ class NestedApp(app.Application):
         self.main.start()
 
 
-class MainView(view.View):
+class MainView(view.FrameView):
 
     def _prepare(self):
         # configure application frame to resize
@@ -30,6 +30,8 @@ class MainView(view.View):
         self.configure_grid(self)
         self.configure_row(self, [0, 1])
         self.configure_column(self, 0)
+        # initialize child
+        # self.controller.child.start()
         # add child on first row
         self.configure_grid(self.controller.child.view, row=0, column=0)
         # add main text
@@ -56,7 +58,7 @@ class MainController(controller.ViewController):
         super(MainController, self).start()
 
 
-class ChildView(view.View):
+class ChildView(view.FrameView):
 
     def _prepare(self):
         self.configure_grid(self)

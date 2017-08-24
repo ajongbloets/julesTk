@@ -1,7 +1,9 @@
 """The Random Plot Application plots random y-values using random generator"""
-from julesTk import app, view
+
+from julesTk import app, view, receives
 from julesTk.utils.observe import Observer
-from julesTk.controller.poller import Poller
+from julesTk.controller import Controller
+from julesTk.controller.poller import ModelUpdatePoller
 from julesTk.model.random import RandomModel
 from julesTk.view.plot import PlotFrame
 
@@ -15,6 +17,7 @@ class RandomPlotApp(app.Application):
 
     def _prepare(self):
         self.add_controller("main", MainController(self))
+        return True
 
     @property
     def main(self):
@@ -24,16 +27,25 @@ class RandomPlotApp(app.Application):
         self.main.start()
 
 
-class MainController(Poller, Observer):
+class MainController(Controller):
+
+    def __init__(self, parent, view=None, model=None):
+        super(MainController, self).__init__(parent, view=view, model=model)
+        self._model_poller = ModelUpdatePoller(self, model=model)
 
     def _prepare(self):
         if self.view is None:
             self._view = MainView(self.root, self)
         if self.model is None:
             self.model = RandomModel()
-            self.model.register_observer(self)
+            self.model.add_observer(self)
+        self.model_poller.set_model(self.model)
         self.view.prepare()
-        return self
+        return True
+
+    @property
+    def model_poller(self):
+        return self._model_poller
 
     @property
     def view(self):
@@ -46,18 +58,12 @@ class MainController(Poller, Observer):
     def _start(self):
         self.view.show()
 
-    def execute(self):
-        """Executed every x seconds"""
-        self.model.update()
-
     def _stop(self):
+        self.model_poller.stop()
         self.view.close()
 
-    def update(self, observable):
-        if isinstance(observable, RandomModel):
-            self.update_plot()
-
-    def update_plot(self):
+    @receives("model_update")
+    def update_plot(self, event, source, data=None):
         plt = self.view.plot
         # initialize
         plt.clear()
@@ -68,17 +74,16 @@ class MainController(Poller, Observer):
         plt.draw()
 
     def start_poller(self):
-        self.set_polling(True)
-        self.run()
+        self.model_poller.start()
 
     def stop_poller(self):
-        self.set_polling(False)
+        self.model_poller.stop()
 
     def reset(self):
         self.model.reset()
 
 
-class MainView(view.View):
+class MainView(view.FrameView):
 
     REFRESH_RATES = {
         "50 msec": 0.05,

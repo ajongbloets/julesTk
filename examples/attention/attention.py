@@ -10,16 +10,17 @@ class AttentionApp(app.Application):
 
     def _prepare(self):
         self.add_controller("main", MainController(self))
+        return True
 
     @property
     def main(self):
         return self.get_controller("main")
 
     def _start(self):
-        self.main.start()
+        return self.main.start()
 
 
-class MainView(view.View):
+class MainView(view.FrameView):
 
     def _prepare(self):
         self.root.resizable(False, False)
@@ -66,6 +67,7 @@ class MainController(controller.ViewController):
 
     def attention(self):
         alert = AlertController(self).prepare()
+        alert.view.title("Attention!")
         alert.start()
         self.view.response = "Undefined"
         if alert.response is True:
@@ -78,7 +80,7 @@ class MainController(controller.ViewController):
             {'id': 'no', 'caption': 'No', 'value': "No", 'default': True},
             {'id': 'yes', 'caption': 'Yes', 'value': "Yes"}
         ])
-        alert.title = "YES or NO?"
+        alert.title = "Attention!"
         alert.message = "YES or NO?"
         alert.start()
         self.view.response = alert.response
@@ -88,22 +90,23 @@ class MainController(controller.ViewController):
             {'id': 'no', 'caption': 'No', 'value': "No", 'default': True},
             {'id': 'yes', 'caption': 'Yes', 'value': "Yes"}
         ]
-        response = modals.MessageBox.alert(
-            parent=self.view, title="YES or NO?", message="YES or NO?", buttons=buttons
+        response = modals.inform(
+            parent=self.view, title="Attention!", message="YES or NO?", buttons=buttons
         )
         self.view.response = response
 
 
-class Alert(modals.Dialog):
+class Alert(modals.DialogTemplate):
 
-    def body(self, parent):
+    def _prepare_body(self, parent):
         lbl = view.ttk.Label(parent, text="YES or NO?")
         self.add_widget("label", lbl)
         self.configure_grid(lbl)
 
-    def footer(self, parent):
+    def _prepare_footer(self, parent):
         btn = view.ttk.Button(parent, text="No", command=self.no)
         self.add_widget("no", btn)
+        btn.focus_set()
         self.configure_grid(btn, row=1, column=0)
         bty = view.ttk.Button(parent, text="Yes", command=self.yes)
         self.add_widget("yes", bty)
@@ -128,6 +131,7 @@ class AlertController(controller.ViewController):
     @property
     def response(self):
         return self.view.response
+
 
 if __name__ == "__main__":
 

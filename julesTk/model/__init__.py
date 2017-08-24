@@ -1,12 +1,12 @@
 """Model classes"""
 
-from julesTk import ThreadSafeObject
-from julesTk.utils.observe import Observable
+from julesTk import *
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
-class Model(Observable, ThreadSafeObject):
+class Model(JTkObject):
+    """Thread-Safe"""
 
     def __init__(self):
         super(Model, self).__init__()
@@ -19,6 +19,8 @@ class Model(Observable, ThreadSafeObject):
             result = self._data
         return result
 
+    @triggers("model_update")
     def update(self):
         """Request the model to update it self"""
         raise NotImplementedError
+

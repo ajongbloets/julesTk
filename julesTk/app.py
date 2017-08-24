@@ -2,17 +2,17 @@
 
 """
 
-from julesTk import ThreadSafeObject
-import sys
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-else:
-    import tkinter as tk
+from julesTk import *
+# import sys
+# if sys.version_info[0] < 3:
+#     import Tkinter as tk
+# else:
+#     import tkinter as tk
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
-class Application(ThreadSafeObject):
+class Application(JTkObject):
     """Manage the application entry point"""
 
     def __init__(self, root=None, *args, **kwargs):
@@ -21,13 +21,26 @@ class Application(ThreadSafeObject):
             root = tk.Tk()
         self._root = root
         self._configured = False
+        self._can_start = False
+        self._can_stop = True
         self.root.protocol("WM_DELETE_WINDOW", self.stop)
         self._controllers = {}
-        self._hooks = {}
 
     @property
     def root(self):
         return self._root
+
+    def can_start(self):
+        return self._can_start is True
+
+    def allow_start(self, state):
+        self._can_start = state is True
+
+    def can_stop(self):
+        return self._can_stop is True
+
+    def allow_stop(self, state):
+        self._can_stop = state is True
 
     @property
     def controllers(self):
@@ -64,26 +77,29 @@ class Application(ThreadSafeObject):
         """Check whether the given controller is registered"""
         return c in self.controllers.values()
 
-    def get_registration_key(self, c):
+    def get_controller_name(self, c):
         """Return the name under which the controller is registered"""
-        for key in self.controllers.keys():
-            if self.get_controller(key) is c:
+        name = None
+        for name in self.controllers.keys():
+            if self.get_controller(name) is c:
                 break
-        return key
+        return name
 
     def add_controller(self, name, controller):
         """Registers a new controller under the given name
 
         :raises KeyError: If another controller is already registered under the same name
 
-        :param name: Name to register the controller under
+        :param name: Name to add_observer the controller under
         :type name: str
-        :param controller: The controller to register
+        :param controller: The controller to add_observer
         :type controller: julesTk.controller.BaseController
         """
         if self.has_controller(name):
             raise KeyError("Already registered a controller under: {}".format(name))
         self.controllers[name] = controller
+        self.add_observer(controller)
+        controller.add_observer(self)
 
     def remove_controller(self, name):
         """Removes a controller from the application
@@ -94,64 +110,19 @@ class Application(ThreadSafeObject):
         """
         if not self.has_controller(name):
             raise KeyError("No controller registered under: {}".format(name))
-        self.controllers.pop(name)
-
-    def has_hook(self, name):
-        return name in self._hooks.keys()
-
-    def create_hook(self, name):
-        """Create a hook to which functions can be registered"""
-        if self.has_hook(name):
-            raise KeyError("Hook %s already exists" % name)
-        self._hooks[name] = []
-
-    def register_hook(self, name, f):
-        """Register a function to a hook
-
-        - Use lambda to register a parametrized function
-        - Functions should return a boolean to report their success
-        """
-        if not self.has_hook(name):
-            self.create_hook(name)
-        self._hooks[name].append(f)
-        return self
-
-    def remove_hook(self, name, f):
-        """Remove the function registration from a hook"""
-        if self.has_hook(name):
-            hooks = self._hooks[name]
-            if f in hooks:
-                hooks.remove(f)
-        return self
-
-    def empty_hook(self, name):
-        """Remove all function registrations from a hook"""
-        if self.has_hook(name):
-            self._hooks[name] = []
-        return self
-
-    def process_hook(self, name):
-        """Run all functions registered to the hook
-
-        :return: Whether all functions ran successful
-        :rtype: bool
-        """
-        hooks = []
-        if self.has_hook(name):
-            hooks = self._hooks[name]
-        result = True
-        for f in hooks:
-            result = f() and result
-        return result
+        controller = self.controllers.pop(name)
+        self.remove_observer(controller)
+        controller.remove_observer(self)
 
     def prepare(self):
-        self._prepare()
-        self._configured = True
+        if self._prepare():
+            self._configured = True
+            self._can_start = True
         return self
 
     def _prepare(self):
         """Configures the application and loads at least one controller"""
-        raise NotImplementedError
+        return True
 
     def run(self):
         """Start the application"""
@@ -179,25 +150,24 @@ class Application(ThreadSafeObject):
         if not self._configured:
             self.prepare()
         # run all hooks associated with starting
-        if self.process_hook("APP_START"):
-            # if successful: start
+        self.trigger_event("application_start")
+        if self.can_start():
             self._start()
-        else:
-            # else exit immediately
-            self._stop()
 
     def _start(self):
         """Everything to show and run the application"""
         raise NotImplementedError
 
     def stop(self):
-        # run all hooks associated with closing
-        if self.process_hook("APP_CLOSE"):
-            # if hooks were successful: exit
+        self.trigger_event("application_close")
+        if self.can_stop():
             self._stop()
         else:
-            # if hooks failed: keep in mainloop
             self._execute()
+
+    @receives("app_close")
+    def _app_close(self, event, source, data=None):
+        self.stop()
 
     def _stop(self):
         """Clean-up after execution

@@ -13,7 +13,7 @@ Look at the examples for small showcases on how to use julesTk.
 Design structure
 ================
 
-MVC: Model-View-Controller, is a well-known and wide practiced design paradigm for designing Graphical User Interfaces (GUI's).
+MVC: Model-FrameView-Controller, is a well-known and wide practiced design paradigm for designing Graphical User Interfaces (GUI's).
 Using a MVC approach makes writing complex applications easier as software with this approach is more modular.
 
 Tkinter: The default GUI framework of python. Although not the most beautiful around it does not require (complex)
@@ -32,11 +32,11 @@ A Controller serves as the logic hub of the application and as a bridge between 
 understand that julesTk requires a strict one-to-one relation between controller and view! This can be an issue when
  you create dialogs in a view-only manner and providing a controller that is also used with another view.
 
-The View
+The FrameView
 --------
 
 * Frame: Non-interacting Frame widget.
-* View: interacting, requires a controller.
+* FrameView: interacting, requires a controller.
 * ViewSet: combine multiple views into one window.
 
 The Model
@@ -44,7 +44,7 @@ The Model
 
 Models store and manipulate data contained by the application. They also serve as a gateway in multi-threaded
 applications: Meaning, multiple threads can share information via the Model. One could - for example - use threads to
- manipulate the Model, while the View and Controller are updated in the MainThread using the Model.
+ manipulate the Model, while the FrameView and Controller are updated in the MainThread using the Model.
 
 
 Observer and Observable
@@ -55,7 +55,7 @@ Models are by default observable, but Controllers need to inherit the Observer c
 See the `click_me` example for a demonstration of this paradigm.
 
 Be aware that this paradigm is not easy to implement in multi-threaded applications. In those cases it may be better
-to use a polling mechanism in the MainThread to periodically update the View.
+to use a polling mechanism in the MainThread to periodically update the FrameView.
 
 Application flow
 ================

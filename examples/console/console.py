@@ -17,6 +17,7 @@ class LogApp(app.Application):
         self.root.geometry('500x500+200+200')
         self.root.minsize(300, 300)
         self.add_controller("main", MainController(self))
+        return True
 
     @property
     def main(self):
@@ -26,7 +27,7 @@ class LogApp(app.Application):
         self.main.start()
 
 
-class MainView(view.View):
+class MainView(view.FrameView):
 
     def _prepare(self):
         self.pack(fill=view.tk.BOTH, expand=1)
@@ -52,21 +53,19 @@ class MainView(view.View):
         if parent is None:
             parent = self
         log = self.get_widget("log")
-        btn = view.ttk.Button(parent, text="Close", command=self.exit)
+        btn = view.ttk.Button(parent, text="Close", command=self.close)
         btn.pack(side=view.tk.RIGHT)
         btc = view.ttk.Button(parent, text="Clear", command=log.clear)
         btc.pack(side=view.tk.RIGHT)
 
-    def exit(self):
-        self.application.stop()
 
-
-class MainController(poller.Poller, controller.ViewController):
+class MainController(controller.ViewController):
 
     VIEW_CLASS = MainView
 
     def __init__(self, parent):
         super(MainController, self).__init__(parent=parent)
+        self._console_poller = ConsoleMessagePoller(self)
         self._log = logging.getLogger()
         self._log.setLevel(20)
         self._count = 0
@@ -79,7 +78,23 @@ class MainController(poller.Poller, controller.ViewController):
         handler = logging.StreamHandler(self.view.get_widget("log"))
         handler.level = 20
         self._log.addHandler(handler)
-        self.run()
+        self._console_poller.start()
+
+    def _stop(self):
+        self._console_poller.stop()
+        self.parent.stop()
+        super(MainController, self)._stop()
+
+
+class ConsoleMessagePoller(poller.Poller):
+
+    def __init__(self, parent):
+        super(ConsoleMessagePoller, self).__init__(parent)
+        self._log = logging.getLogger()
+        self._count = 0
+
+    def reset(self):
+        self._count = 0
 
     def execute(self):
         self._log.info("Cycle {}".format(self._count))

@@ -147,7 +147,7 @@ class ProgressBar(threading.Thread):
         """Initialize a progress bar and run command in a separate thread
 
         :param parent: Parent VIEW to connect dialog to.
-        :type parent: julesTk.view.View
+        :type parent: julesTk.view.FrameView
         :param: The command to execute in the separate thread
         :type command: callable
         :param mode: What kind of progress bar to show?

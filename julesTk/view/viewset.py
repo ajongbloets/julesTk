@@ -1,4 +1,4 @@
-from julesTk.view import View
+from julesTk.view import FrameView
 
 
 class BaseViewSet(object):
@@ -15,7 +15,7 @@ class BaseViewSet(object):
     def views(self):
         """
 
-        :rtype: dict[str, pyLabJackView.view.View]
+        :rtype: dict[str, pyLabJackView.view.FrameView]
         """
         return self._views
 
@@ -23,7 +23,7 @@ class BaseViewSet(object):
         """
 
         :param name: Name of the view
-        :rtype: julesTk.view.View
+        :rtype: julesTk.view.FrameView
         """
         if not self.has_view(name):
             KeyError("No view registered under: {}".format(name))
@@ -44,7 +44,7 @@ class BaseViewSet(object):
         self.views.pop(name)
 
     def show_view(self, name):
-        """Show a specific View"""
+        """Show a specific FrameView"""
         v = self.get_view(name)
         v.show()
 
@@ -55,7 +55,7 @@ class BaseViewSet(object):
             # done
 
     def hide_view(self, name):
-        """Hide a specific View"""
+        """Hide a specific FrameView"""
         v = self.get_view(name)
         v.hide()
 
@@ -70,7 +70,7 @@ class BaseViewSet(object):
         self.remove_view(name)
 
 
-class ViewSet(View, BaseViewSet):
+class ViewSet(FrameView, BaseViewSet):
     """A view that can contain one or more other views"""
 
     def __init__(self, parent, controller):

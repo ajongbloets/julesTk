@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 
 
-class PlotFrame(Frame, object):
+class PlotFrame(FrameView, object):
 
     def __init__(self, parent):
         super(PlotFrame, self).__init__(parent)
@@ -92,7 +92,7 @@ class PlotFrame(Frame, object):
         self.canvas.draw()
 
 
-class PlotView(View):
+class PlotView(FrameView):
     """ A view with a plot embedded.
 
     """

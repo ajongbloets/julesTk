@@ -19,7 +19,7 @@ class QuestionApp(app.Application):
         self.main.start()
 
 
-class MainView(view.View):
+class MainView(view.FrameView):
 
     def _prepare(self):
         # prevent resize

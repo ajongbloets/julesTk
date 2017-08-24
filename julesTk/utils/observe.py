@@ -13,7 +13,7 @@ class Observable(object):
     1. Call `notify_observers()` directly from a method, after data was updated
     2. Use `@observed` decorator for methods that should call `notify_observers` when finished
 
-    Observers can register themselves using the `register_observer` method.
+    Observers can add_observer themselves using the `register_observer` method.
     Only 1 observer registration per object.
 
     """

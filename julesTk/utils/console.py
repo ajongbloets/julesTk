@@ -5,7 +5,7 @@ from julesTk import view
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
 
 
-class LogView(view.Frame):
+class LogView(view.FrameView):
     """A view to show log messages"""
 
     def __init__(self, parent):

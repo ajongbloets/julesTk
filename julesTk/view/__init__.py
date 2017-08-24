@@ -1,19 +1,15 @@
 """Implementing basic view objects"""
 
-import sys
-if sys.version_info[0] < 3:
-    import Tkinter as tk
-    import ttk
-else:
-    import tkinter as tk
-    from tkinter import ttk
-
-from julesTk.app import Application
+from julesTk import *
 
 __author__ = "Joeri Jongbloets <joeri@jongbloets.net>"
+__all__ = [
+    "JTkView", "FrameView", "WmView",
+    "tk", "ttk", "receives", "triggers"
+]
 
 
-class BaseFrame(object):
+class BaseWm(object):
     """Empty base class used to share most basic functions between frames and views"""
 
     FONT_FAMILY = "Verdana"
@@ -43,14 +39,8 @@ class BaseFrame(object):
             w.grid_rowconfigure(index, **kwargs)
 
 
-class Frame(ttk.Frame, BaseFrame):
-
-    def __init__(self, parent):
-        super(Frame, self).__init__(parent)
-
-
-class BaseView(BaseFrame):
-    """Base View implementing most of the view functionality
+class JTkView(JTkObject):
+    """Base FrameView implementing most of the view functionality
 
     Preparation and loading of widgets
     ----------------------------------
@@ -78,18 +68,17 @@ class BaseView(BaseFrame):
     STATE_HIDDEN = 3
     STATE_CLOSED = -1
 
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller=None):
         """Initialize a BaseView
 
         :param parent: Parent view (or application)
         :param controller: Controlling controller
         """
-        super(BaseView, self).__init__()
+        super(JTkView, self).__init__()
         self._view_state = self.STATE_INITIALIZED
         self._parent = parent
-        self._controller = controller
-        self._variables = {}
-        self._widgets = {}
+        self._controller = None
+        self.set_controller(controller)
 
     def __del__(self):
         self.close()
@@ -128,23 +117,22 @@ class BaseView(BaseFrame):
         :rtype: Tkinter.Tk or tkinter.Tk
         """
         result = self.parent
-        if isinstance(result, BaseView):
+        if isinstance(result, JTkView):
             result = self.parent.root
         return result
 
     @property
     def application(self):
-        """Return the Application controller
-
-        :rtype: julesTk.app.Application
-        """
-        result = self.controller.parent
-        if not isinstance(result, Application):
-            result = result.application
+        """Return the application"""
+        if self.has_controller():
+            result = self.controller.application
+        else:
+            result = self.parent
+            if isinstance(self.parent, JTkView):
+                result = self.parent.application
         return result
 
-    @property
-    def controller(self):
+    def get_controller(self):
         """ The controller
 
         :rtype: julesTk.controller.BaseController
@@ -152,20 +140,23 @@ class BaseView(BaseFrame):
         return self._controller
 
     @property
-    def variables(self):
-        """Variables registered to this view
+    def controller(self):
+        return self.get_controller()
 
-        :rtype: dict[str, Tkinter.Variable | tkinter.Variable]
-        """
-        return self._variables
+    def has_controller(self):
+        return self.get_controller() is not None
 
-    @property
-    def widgets(self):
-        """Widgets registered to this view
-
-        :rtype: dict[str, Tkinter.BaseWidget | tkinter.BaseWidget]
-        """
-        return self._widgets
+    def set_controller(self, c):
+        from julesTk.controller import BaseController
+        if c is not None and not isinstance(c, BaseController):
+            raise ValueError("Expected a BaseController not a {}".format(type(c).__name__))
+        if self.controller is not None:
+            self.remove_observer(self.controller)
+            self.controller.remove_observer(self)
+        self._controller = c
+        if self.controller is not None:
+            self.add_observer(self.controller)
+            self.controller.add_observer(self)
 
     def prepare(self):
         self._prepare()
@@ -175,6 +166,7 @@ class BaseView(BaseFrame):
     def _prepare(self):
         raise NotImplementedError
 
+    @receives("controller_start")
     def show(self):
         if self.view_state < self.STATE_CONFIGURED:
             self.prepare()
@@ -191,12 +183,31 @@ class BaseView(BaseFrame):
     def _hide(self):
         raise NotImplementedError
 
+    @triggers("view_close", before=True)
     def close(self):
         self._view_state = self.STATE_CLOSED
         return self._close()
 
     def _close(self):
         raise NotImplementedError
+
+
+class WmView(BaseWm, JTkView):
+    """A Frame acting as """
+
+    def __init__(self, parent, controller):
+        BaseWm.__init__(self)
+        JTkView.__init__(self, parent, controller)
+        self._variables = {}
+        self._widgets = {}
+
+    @property
+    def variables(self):
+        """Variables registered to this view
+
+        :rtype: dict[str, Tkinter.Variable | tkinter.Variable]
+        """
+        return self._variables
 
     def has_variable(self, name):
         """Whether a variable is registered under the given name
@@ -210,9 +221,9 @@ class BaseView(BaseFrame):
     def add_variable(self, name, variable):
         """Register a variable under a new name to the view
 
-        :param name: Name to register the variable under
+        :param name: Name to add_observer the variable under
         :type name: str
-        :param variable: The variable to register
+        :param variable: The variable to add_observer
         :type variable: Tkinter.Variable | tkinter.Variable
         :rtype: Tkinter.Variable | tkinter.Variable
         """
@@ -248,6 +259,14 @@ class BaseView(BaseFrame):
         self.variables.pop(name)
         return not self.has_variable(name)
 
+    @property
+    def widgets(self):
+        """Widgets registered to this view
+
+        :rtype: dict[str, Tkinter.BaseWidget | tkinter.BaseWidget]
+        """
+        return self._widgets
+
     def has_widget(self, name):
         """Whether a widget is registered using the given name
 
@@ -261,7 +280,7 @@ class BaseView(BaseFrame):
 
         :param name: Name of the widget
         :type name: str
-        :param widget: The widget to register
+        :param widget: The widget to add_observer
         :type widget: Tkinter.BaseWidget | tkinter.BaseWidget
         :return: The registered widget
         :rtype: Tkinter.BaseWidget | tkinter.BaseWidget
@@ -298,13 +317,25 @@ class BaseView(BaseFrame):
         self.widgets.pop(name)
         return not self.has_widget(name)
 
+    def _show(self):
+        raise NotImplementedError
 
-class View(Frame, BaseView):
-    """A Frame acting as """
+    def _hide(self):
+        raise NotImplementedError
 
-    def __init__(self, parent, controller):
-        Frame.__init__(self, parent)
-        BaseView.__init__(self, parent, controller)
+    def _close(self):
+        raise NotImplementedError
+
+    def _prepare(self):
+        """Configure this view"""
+        raise NotImplementedError
+
+
+class FrameView(ttk.Frame, WmView):
+
+    def __init__(self, parent, controller=None):
+        ttk.Frame.__init__(self, master=parent)
+        WmView.__init__(self, parent=parent, controller=controller)
 
     def _show(self):
         """Shows the view"""
@@ -324,5 +355,4 @@ class View(Frame, BaseView):
         return True
 
     def _prepare(self):
-        """Configure this view"""
         raise NotImplementedError

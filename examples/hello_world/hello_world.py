@@ -20,7 +20,7 @@ class HelloWorld(app.Application):
         self.main.start()
 
 
-class HelloWorldView(view.View):
+class HelloWorldView(view.FrameView):
 
     def _prepare(self):
         # resize frame with window size

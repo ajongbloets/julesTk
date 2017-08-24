@@ -1,6 +1,6 @@
 
 from __future__ import absolute_import
-from . import Model
+from . import Model, receives, triggers
 import random
 
 
@@ -24,7 +24,7 @@ class RandomModel(Model):
             result = self._std
         return result
 
-    @Model.observed
+    @triggers("model_reset")
     def reset(self):
         with self.lock:
             self._data = []
@@ -32,7 +32,7 @@ class RandomModel(Model):
     def generate(self):
         return random.gauss(self.mean, self.std)
 
-    @Model.observed
+    @triggers("model_update")
     def update(self):
         with self.lock:
             self._data.append(self.generate())

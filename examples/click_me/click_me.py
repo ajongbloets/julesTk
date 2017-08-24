@@ -21,7 +21,7 @@ class ClickMeApp(app.Application):
         self.main.start()
 
 
-class MainView(view.View):
+class MainView(view.FrameView):
 
     def _prepare(self):
         # resize uniform over rows/columns with window
