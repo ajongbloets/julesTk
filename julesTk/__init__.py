@@ -67,6 +67,7 @@ class JTkMeta(type):
         cls.class_event_slots = class_event_slots
         super(JTkMeta, cls).__init__(name, bases, attrs)
 
+
 @six.add_metaclass(JTkMeta)
 class JTkObject(object):
     """A julesTk object; comes with a event-driven communication system"""

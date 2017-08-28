@@ -51,6 +51,7 @@ class JTkObjectSubclassExample(JTkObjectExample):
     def extra_slot(self, event, source, data=None):
         pass
 
+
 class TestJTObject(unittest.TestCase):
 
     def test_event_slot_registration(self):
